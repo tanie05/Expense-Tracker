@@ -1,0 +1,136 @@
+html{
+    display:inline-block;
+    width: 800px;
+    align-items: center;
+    margin-left: 225px;
+    background-color:#8458B3;
+    margin-top: 40px;
+    padding: 0px;
+    
+}
+body{
+    
+    background-color: #e5eaf5;
+    padding: 10px;
+
+
+}
+*{
+    font-family:'Courier New', Courier, monospace;
+    text-align: center;
+    
+}
+.totals{
+    margin: 0;   
+    display: block;
+    color:#a28089;
+}
+.totals-budget{
+    padding-right: 50px;
+    display: inline-block;
+}
+.totals-expense{
+    padding-left: 50px;
+    display: inline-block;
+}
+form{
+    
+    padding: 30px;
+    padding-top: 0;
+    width: max-content;
+    display:inline-block;
+    margin: 10px;
+}
+.form-items{
+    padding: 5px;
+    margin: 5px;
+    width: 170px;
+    border:#a0d2eb 1px solid;
+    border-radius: 8px;
+    font-weight: bold;
+
+    
+}
+.submit-btn{
+    background-color:#8458B3;
+    border: none;
+    box-shadow: 3px 3px  #a0d2eb;
+    width: 70px;
+    margin: 20px;
+    cursor: pointer;
+
+
+}
+.type{
+    width: fit-content;
+}
+.form-heading{
+    color: #a28089;
+    
+}
+.header{
+    color: #8458B3;
+    padding: 20px;
+}
+.list-item{
+    list-style-type: none;
+}
+table, td, th {
+    border: 0.5px solid;
+    border:#a28089 1px solid;
+    font-weight: bold;
+    /* color:#a28089; */
+  }
+td{
+    padding: 5px;
+}  
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+.history-heading{
+    margin-top: 0px;
+    color: #8458B3;
+}
+.list{
+    max-height: 400px;
+    overflow : scroll;
+    overflow-x: hidden;
+}
+.budget{
+    color: #009150;
+}
+.expense{
+    color: #EE204D;
+}
+*{
+    font-family: 'Urbanist', sans-serif;
+}
+a{
+    padding: 10px;
+    
+}
+.filterformele{
+    margin: 4px;
+}
+.navbar{
+    background-color: #d9dfec;
+    padding: 15px;
+    font-size: 18px;
+    margin: 0px 30px 30px 30px;
+    
+}
+.nav-elements{
+    text-decoration: none;
+    color: #8458B3;
+    font-weight: bold;
+}
+.welcome-msg{
+    font-family:cursive;
+
+}
+.del-btn{
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+}
