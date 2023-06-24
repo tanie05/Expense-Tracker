@@ -49,30 +49,29 @@ router.route('/:id').delete((req, res) => {
     .catch(err => res.status(400).json('Error: ' + err));
 });
 
-router.route('/:id').put((req,res) => {
-  // const username = req.body.username;
-  // const amount = req.body.amount;
-  // const category = req.body.category;
-  // const date = Date.parse(req.body.date);
-  // const type = req.body.type;
-   
-  Transaction.findByIdAndUpdate(req.params.id, {
-    username: req.body.username,
-    amount: req.body.amount,
-    category : req.body.category,
-    type: req.body.type
-  }, 
-  { new: true }, 
-  (err, user) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-  
-    console.log(user);
-  })
+router.route('/:id').put(async (req,res) => {
+  const {id} = req.params;
+  const updateType = req.body.type;
+  const updateAmount = req.body.amount;
+  const updateCat = req.body.category;
 
-})
+  try{
+    const updatedObject = await Transaction.findByIdAndUpdate(id, {
+      amount: updateAmount,
+      type: updateType,
+      category : updateCat
+    });
+
+    if(!updatedObject){
+      return res.status(404).json({success: false,message: "object not found"})
+    }
+    return res.json({success: true, message: "updated successfully"});
+  } catch(err){
+    console.log(err);
+    return res.status(500).json({success: false, message: "update failed"})
+  }
+});
+
 
 router.route('/update/:id').post((req, res) => {
   Transaction.findById(req.params.id)

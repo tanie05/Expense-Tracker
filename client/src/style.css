@@ -134,3 +134,14 @@ a{
     padding: 5px;
     margin: 5px;
 }
+.edit-btn{
+    border-radius: 5px;
+    padding: 5px 15px;
+    margin: 5px;
+    text-decoration: none;
+    color: black;
+    font-size: 15px;
+    font-weight: initial;
+    
+    
+}

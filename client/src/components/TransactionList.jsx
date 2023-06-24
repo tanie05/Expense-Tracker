@@ -107,9 +107,10 @@ const listOfTransactions = displayData.map(trans => {
       <table style= {{width:"100% "}}>
         <tbody>
         <tr>
-              <td style= {{width:"60%"}}> {trans.category? trans.category:"Transaction"}</td>
+              <td style= {{width:"50%"}}> {trans.category? trans.category:"Transaction"}</td>
               <td style={{width: "20%"}}>Rs. {trans.amount? trans.amount:0}</td>
               <td><button  className="del-btn submit-btn" onClick={() => handleDelete(trans._id)}>Delete</button></td>
+              <td><Link className="edit-btn submit-btn" to= {`/?id=${trans._id}&amount=${trans.amount}&type=${trans.type}&category=${trans.category}`} >Edit</Link></td>
     
           </tr>
         </tbody>
