@@ -1,8 +1,13 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import {Link} from 'react-router-dom'
+import {UserContext} from '../UserContext'
 
-export default function navbar() {
-  const user = localStorage.getItem("user");
+export default function Navbar() {
+  
+  // const user = useContext(UserContext)
+  const { value, updateValue } = useContext(UserContext);
+
+
   function handleClick() {
     localStorage.clear()
     window.location.reload(false)
@@ -12,9 +17,9 @@ export default function navbar() {
       <Link to="/" className='nav-elements'>Add new Transaction</Link>
       <Link to = "/view" className='nav-elements'>All Transactions</Link>
       
-      {!user && <Link to="/login" className='nav-elements'>Login</Link>}
-      {!user && <Link to="/register" className='nav-elements'>Register</Link>}
-      {user && <Link onClick={handleClick} to="/" className='nav-elements'>Logout</Link>}
+      {!value && <Link to="/login" className='nav-elements'>Login</Link>}
+      {!value && <Link to="/register" className='nav-elements'>Register</Link>}
+      {value && <Link onClick={handleClick} to="/" className='nav-elements'>Logout</Link>}
       
       
     </div>

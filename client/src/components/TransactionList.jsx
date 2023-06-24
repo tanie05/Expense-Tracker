@@ -1,14 +1,12 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
+import {UserContext} from '../UserContext'
 
-export default function TransactionList(props) {
+export default function TransactionList() {
  
-  const usernam = props.user
-  if(!usernam){
-    alert('Login to create a transaction!')
-    window.location = "/login"
-  }
+  const { value } = useContext(UserContext);
+
 
   const [data, setData] = React.useState([]);
   const [displayData, setDisplayData] = React.useState([]);
@@ -16,10 +14,9 @@ export default function TransactionList(props) {
   const [expense, setExpense] = React.useState(0)
 
   const fetchInfo = async () => { 
-    const response = await axios.get(`http://localhost:5000/transactions/${usernam}`);
+    const response = await axios.get(`http://localhost:5000/transactions/${value}`);
     setData(response.data);
     setDisplayData(response.data);
-    
   }
   
   React.useEffect(() => { 

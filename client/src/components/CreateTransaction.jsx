@@ -2,13 +2,16 @@ import React from "react";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { useLocation } from 'react-router-dom';
+import {UserContext} from "../UserContext"
+import { useContext } from "react";
 
-export default function Transaction(props) {
+export default function Transaction() {
     
+    // const usernam = useContext(UserContext)
+    const { value, updateValue } = useContext(UserContext);
 
-    const usernam = props.user
     const dateAdded = "2023-06-24T06:57:23.401Z"
-    const [trans, setTrans] = React.useState({username: usernam, amount:0, category: "", type: "expense", date: dateAdded });
+    const [trans, setTrans] = React.useState({username: value, amount:0, category: "", type: "expense", date: dateAdded });
     
     const [options, setOptions] = React.useState(["food", "transport", "rent", "electricity", "taxes", "health"]);
     
@@ -43,14 +46,12 @@ export default function Transaction(props) {
             return {...prevTrans, type: event.target.value }
         })
     }
-    // const fetchInfo = async () => { 
-    //     const response = await axios.post(`http://5000/transactions/add`, trans);
-    //     console.log(response.data) 
-    //   }
+   
+
     function handleSubmit(event){
 
         event.preventDefault()
-        if(!usernam){
+        if(value.length === 0){
             alert('Login to create a transaction!')
             window.location = "/login"
         }

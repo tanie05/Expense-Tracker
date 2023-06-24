@@ -1,42 +1,39 @@
-import React  from 'react'
+import React, { useContext }  from 'react'
 import { useState } from 'react'
 import axios from 'axios';
-export default function Login() {
+import {UserContext} from '../UserContext'
+import { Navigate } from 'react-router-dom';
+export default function Login(props) {
 
-  const [user, setUser] = useState({username: "", password: ""});
+  const { setValue } = useContext(UserContext);
+  const [redirect,setRedirect] = useState(false);
+  const [name,setName] = useState("")
+  const [pw,setPw] = useState("")
 
-  function handleNameChange(event){
-    setUser(prevUser => {
-        return {...prevUser, username: event.target.value }
-    })
-  }
-  function handlePasswordChange(event){
-    setUser(prevUser => {
-        return {...prevUser, password: event.target.value }
-    })
-  }
   function loginUser(event){
+    
     event.preventDefault();
-    axios.post('http://localhost:5000/auth/login', user)
+
+    axios.post('http://localhost:5000/auth/login', {"username" : name, "password" : pw})
       .then(res => {
         if(res.data.success === true){
-        const value = res.data.user.username;
-        localStorage.setItem("user",value)
-        window.location = "/"
+        setValue(name)
+        setRedirect(true)
       }
       else{
         alert(res.data.message)
         window.location = "/login"
       }
-        }
+      }
       )
       .catch((err) => {
         alert(err)
         window.location = "/login"
       })
         
-      
-      
+  }
+  if(redirect) {
+    return <Navigate to={'/'} />
   }
 
   return (
@@ -45,8 +42,8 @@ export default function Login() {
 
             <input 
               className="form-items" 
-              value={user.username}
-              onChange={(e) => handleNameChange(e)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder='Username'
             />
             <br />
@@ -55,8 +52,8 @@ export default function Login() {
             className="form-items" 
             type="password"  
             placeholder="Password" 
-            value={user.password}
-            onChange={(e) => handlePasswordChange(e)} 
+            value={pw}
+            onChange={(e) => setPw(e.target.value)} 
             />
             <br />
 
