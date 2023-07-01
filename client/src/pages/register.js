@@ -1,13 +1,14 @@
 import React, {useContext} from 'react'
 import '../style.css'
 import axios from 'axios'
-import {UserContext, UserContextProvider} from '../UserContext'
+import {UserContext} from '../UserContext'
 import { Navigate } from 'react-router-dom'
+import baseUrl from '../appConfig'
 export default function Register() {
 
   const [user, setUser] = React.useState({username: "", email: "", password: ""})
   const [flag, setFlag] = React.useState(false);
-  const { value, setValue } = useContext(UserContext);
+  const { setValue } = useContext(UserContext);
   
   function handleNameChange(event){
     setUser(prevUser => {
@@ -28,14 +29,14 @@ export default function Register() {
   }
   function registerUser(event){
     event.preventDefault();
-    axios.post('http://localhost:5000/auth/register', user)
+    axios.post(`${baseUrl}/auth/register`, user)
       .then(res => {
         if(res.data.success === true){
         
         const nameVal = res.data.user.username;
-        const idVal = res.data.user._id;
         
         setValue(nameVal);
+        localStorage.setItem('user', JSON.stringify(nameVal));
         setFlag(true)
       }
         else{

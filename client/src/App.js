@@ -1,10 +1,9 @@
-import React, {useContext, useState} from 'react'
-
+import React from 'react'
 import Home from "./pages/Home"
 import Login from './pages/Login'
 import Register from "./pages/Register";
 import List from "./pages/List"
-import {UserContext, UserContextProvider} from './UserContext'
+import {UserContextProvider} from './UserContext'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 export default function App() {

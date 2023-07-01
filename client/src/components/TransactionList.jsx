@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 import {UserContext} from '../UserContext'
-
+import baseUrl from '../appConfig'
 export default function TransactionList() {
  
   const { value } = useContext(UserContext);
@@ -14,7 +14,7 @@ export default function TransactionList() {
   const [expense, setExpense] = React.useState(0)
 
   const fetchInfo = async () => { 
-    const response = await axios.get(`http://localhost:5000/transactions/${value}`);
+    const response = await axios.get(`${baseUrl}/transactions/${value}`);
     setData(response.data);
     setDisplayData(response.data);
   }
@@ -85,7 +85,7 @@ function handleReset(event) {
 }
 const handleDelete = async (id) => {
   try {
-    const res = await axios.delete(`http://localhost:5000/transactions/${id}`)
+    const res = await axios.delete(`${baseUrl}/transactions/${id}`)
     console.log('Item successfully deleted.')
     window.location.reload(false)
   } catch (error) {

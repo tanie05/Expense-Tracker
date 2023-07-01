@@ -3,6 +3,7 @@ import { useState } from 'react'
 import axios from 'axios';
 import {UserContext} from '../UserContext'
 import { Navigate } from 'react-router-dom';
+import baseUrl from '../appConfig'
 export default function Login(props) {
 
   const { setValue } = useContext(UserContext);
@@ -14,10 +15,11 @@ export default function Login(props) {
     
     event.preventDefault();
 
-    axios.post('http://localhost:5000/auth/login', {"username" : name, "password" : pw})
+    axios.post(`${baseUrl}/auth/login`, {"username" : name, "password" : pw})
       .then(res => {
         if(res.data.success === true){
         setValue(name)
+        localStorage.setItem('user', JSON.stringify(name));
         setRedirect(true)
       }
       else{

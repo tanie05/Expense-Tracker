@@ -4,6 +4,7 @@ import axios from "axios";
 import { useLocation } from 'react-router-dom';
 import {UserContext} from "../UserContext"
 import { useContext } from "react";
+import baseUrl from "../appConfig";
 
 export default function Transaction() {
     
@@ -56,12 +57,12 @@ export default function Transaction() {
             window.location = "/login"
         }
         if(!editMode){
-            axios.post('http://localhost:5000/transactions/add', trans)
+            axios.post(`${baseUrl}/transactions/add`, trans)
             .then(res => console.log(res.data));
             document.getElementById("my-form").reset()
         }
         else{
-            axios.put(`http://localhost:5000/transactions/${fetchedId}`, trans)
+            axios.put(`${baseUrl}/transactions/${fetchedId}`, trans)
             .then(res => console.log(res))
             setEditMode(false)
             document.getElementById("my-form").reset();
