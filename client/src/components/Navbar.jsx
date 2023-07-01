@@ -5,11 +5,12 @@ import {UserContext} from '../UserContext'
 export default function Navbar() {
   
   // const user = useContext(UserContext)
-  const { value, updateValue } = useContext(UserContext);
+  const {value,setValue } = useContext(UserContext);
 
 
   function handleClick() {
     localStorage.clear()
+    setValue("")
     window.location.reload(false)
   }
   return (

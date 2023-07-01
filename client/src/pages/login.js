@@ -4,7 +4,8 @@ import axios from 'axios';
 import {UserContext} from '../UserContext'
 import { Navigate } from 'react-router-dom';
 import baseUrl from '../appConfig'
-export default function Login(props) {
+
+export default function Login() {
 
   const { setValue } = useContext(UserContext);
   const [redirect,setRedirect] = useState(false);
@@ -19,7 +20,7 @@ export default function Login(props) {
       .then(res => {
         if(res.data.success === true){
         setValue(name)
-        localStorage.setItem('user', JSON.stringify(name));
+        localStorage.setItem('user', name);
         setRedirect(true)
       }
       else{

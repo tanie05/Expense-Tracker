@@ -4,6 +4,7 @@ import axios from 'axios'
 import {UserContext} from '../UserContext'
 import { Navigate } from 'react-router-dom'
 import baseUrl from '../appConfig'
+
 export default function Register() {
 
   const [user, setUser] = React.useState({username: "", email: "", password: ""})
@@ -36,7 +37,7 @@ export default function Register() {
         const nameVal = res.data.user.username;
         
         setValue(nameVal);
-        localStorage.setItem('user', JSON.stringify(nameVal));
+        localStorage.setItem('user', nameVal);
         setFlag(true)
       }
         else{
