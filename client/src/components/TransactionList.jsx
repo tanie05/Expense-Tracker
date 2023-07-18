@@ -14,14 +14,17 @@ export default function TransactionList() {
   const [expense, setExpense] = React.useState(0)
 
   const fetchInfo = async () => { 
-    const response = await axios.get(`${baseUrl}/transactions/${value}`);
-    setData(response.data);
-    setDisplayData(response.data);
+    if(value.length > 0){
+      const response = await axios.get(`${baseUrl}/transactions/${value}`);
+      setData(response.data);
+      setDisplayData(response.data);
+    }
+    
   }
   
   React.useEffect(() => { 
         fetchInfo(); 
-  }, [])
+  },[])
   React.useEffect(() => {
     setBudget(calculateBudget(displayData));
     setExpense(calculateExpense(displayData));
@@ -85,7 +88,7 @@ function handleReset(event) {
 }
 const handleDelete = async (id) => {
   try {
-    const res = await axios.delete(`${baseUrl}/transactions/${id}`)
+    await axios.delete(`${baseUrl}/transactions/${id}`)
     console.log('Item successfully deleted.')
     window.location.reload(false)
   } catch (error) {

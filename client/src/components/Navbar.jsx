@@ -1,18 +1,25 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import {Link} from 'react-router-dom'
 import {UserContext} from '../UserContext'
+import { Navigate } from 'react-router-dom';
 
 export default function Navbar() {
   
-  // const user = useContext(UserContext)
+
   const {value,setValue } = useContext(UserContext);
+  const [redirect, setRedirect] = useState(false);
 
 
   function handleClick() {
     localStorage.clear()
     setValue("")
-    window.location.reload(false)
+    localStorage.clear();
+    setRedirect(true)
   }
+  if(redirect) {
+    return <Navigate to={'/'} />
+  }
+
   return (
     <div className='navbar'>
       <Link to="/" className='nav-elements'>Add new Transaction</Link>

@@ -33,24 +33,26 @@ export default function Register() {
     axios.post(`${baseUrl}/auth/register`, user)
       .then(res => {
         if(res.data.success === true){
-        
-        const nameVal = res.data.user.username;
-        
-        setValue(nameVal);
-        localStorage.setItem('user', nameVal);
+        setValue(user.username)
+        localStorage.setItem('user', user.username);
         setFlag(true)
+        // const nameVal = res.data.user.username;
+        // setValue(nameVal);
+        // localStorage.setItem('user', nameVal);
+        // setFlag(true)
+
       }
         else{
           alert(res.data.message)
           window.location = "/register"
         }
         }
-        );
+        )
+        .catch(err => alert("Some error occured!"));
       
   }
-
   if(flag){
-    <Navigate to = {'/'} />
+    return (<Navigate to = {'/'} />)
   }
   return (
     <form id="my-form" className="my-form" onSubmit={registerUser}>

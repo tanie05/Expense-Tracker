@@ -49,29 +49,32 @@ export default function Transaction() {
     }
    
 
-    function handleSubmit(event){
-
-        event.preventDefault()
-        if(value.length === 0){
-            alert('Login to create a transaction!')
-            window.location = "/login"
+    async function handleSubmit(event) {
+        event.preventDefault();
+    
+        if (value.length === 0) {
+            alert('Login to create a transaction!');
+            window.location = "/login";
+            return;
         }
-        if(!editMode){
-            axios.post(`${baseUrl}/transactions/add`, trans)
-            .then(res => console.log(res.data));
-            document.getElementById("my-form").reset()
+    
+        try {
+            if (!editMode) {
+                const res = await axios.post(`${baseUrl}/transactions/add`, trans);
+                console.log(res.data);
+                document.getElementById("my-form").reset();
+            } else {
+                const res = await axios.put(`${baseUrl}/transactions/${fetchedId}`, trans);
+                console.log(res);
+                setEditMode(false);
+                document.getElementById("my-form").reset();
+                window.location = "/view";
+            }
+        } catch (error) {
+            alert(error);
         }
-        else{
-            axios.put(`${baseUrl}/transactions/${fetchedId}`, trans)
-            .then(res => console.log(res))
-            setEditMode(false)
-            document.getElementById("my-form").reset();
-            window.location = "/view";
-        }
-        
-        
-        
     }
+    
     
     function addNewCategory()  {
         var newCategory = prompt("Enter new category: ")

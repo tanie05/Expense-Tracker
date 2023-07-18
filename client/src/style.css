@@ -6,22 +6,22 @@ html{
     background-color:#8458B3;
     margin-top: 40px;
     padding: 0px;
-    @media only screen and (max-width: 450px) {
+    @media screen and (max-width:450px) {
+        width: 100vw;
         margin: 0;
-        width: 400px;
-      }
+        padding: 0;
+    }
     
 }
 body{
     
     background-color: #e5eaf5;
     padding: 10px;
-    @media only screen and (max-width: 450px) {
-        width: "70vw";
+    @media screen and (max-width:450px) {
+        width: 100vw;
         margin: 0;
-        padding: 0px;
-        
-      }
+        padding: 0;
+    }
 
 
 }
@@ -32,25 +32,32 @@ body{
 }
 .totals{
     margin: 0;   
-    display: block;
-    color:#a28089;
+    @media screen and (max-width:450px) {
+        display: flex;
+        font-size: 15px;
+        
+    }
+
     
 }
 .totals-budget{
     padding-right: 50px;
     display: inline-block;
-    @media only screen and (max-width: 450px) {
-        font-size: 15px;
-        
-      }
+    color: #009150;
+    @media screen and (max-width:450px) {
+       flex: 1;
+       
+
+    }
 }
 .totals-expense{
     padding-left: 50px;
     display: inline-block;
-    @media only screen and (max-width: 450px) {
-        font-size: 15px;
-        
-      }
+    color:#EE204D;
+    @media screen and (max-width:450px) {
+       padding: 0;
+       flex: 1;
+    }
 }
 form{
     
@@ -59,10 +66,11 @@ form{
     width: max-content;
     display:inline-block;
     margin: 10px;
-    @media only screen and (max-width: 450px) {
-        padding: 0px;
+    @media screen and (max-width:450px) {
+        padding: 0;
         
-      }
+     }
+    
 }
 .form-items{
     padding: 5px;
@@ -71,23 +79,24 @@ form{
     border:#a0d2eb 1px solid;
     border-radius: 8px;
     font-weight: bold;
+   
     
     
 }
 .submit-btn{
     background-color:#8458B3;
+    opacity: 90%;
     border: none;
     box-shadow: 3px 3px  #a0d2eb;
     width: 70px;
     margin: 20px;
     cursor: pointer;
-    @media only screen and (max-width: 450px) {
-        width: 50px;
-        padding: 10px;
-        font-size: 12px;
-        margin: 15px;
+    @media screen and (max-width:450px) {
+        width: fit-content;
+        margin: 5px;
+
         
-      }
+     }
 
 
 }
@@ -97,14 +106,16 @@ form{
 .form-heading{
     color: #a28089;
     
+    
 }
 .header{
     color: #8458B3;
     padding: 20px;
-    @media only screen and (max-width: 450px) {
-        font-size: 10px;
+    @media screen and (max-width:450px) {
+        padding: 0;
         
-      }
+     }
+   
 }
 .list-item{
     list-style-type: none;
@@ -113,7 +124,7 @@ table, td, th {
     border: 0.5px solid;
     border:#a28089 1px solid;
     font-weight: bold;
-    /* color:#a28089; */
+   
   }
 td{
     padding: 5px;
@@ -125,6 +136,7 @@ table {
 .history-heading{
     margin-top: 0px;
     color: #8458B3;
+  
 }
 .list{
     max-height: 400px;
@@ -152,10 +164,16 @@ a{
     padding: 15px;
     font-size: 18px;
     margin: 0px 30px 30px 30px;
-    @media only screen and (max-width: 450px) {
-        font-size: 12px;
-        margin: 10px;
-      }
+    @media screen and (max-width:450px) {
+        display: flex;
+        flex-wrap: wrap;
+        font: 12px;
+        padding: 5px 0;
+        margin: 0;
+        
+
+        
+     }
     
 }
 .nav-elements{
