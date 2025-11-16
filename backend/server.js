@@ -4,11 +4,12 @@ const mongoose = require('mongoose')
 
 const transactionRouter =  require('./routes/transactionRouter')
 const authRouter = require('./routes/authRouter')
+const chatRouter = require('./routes/chatRouter')
 
 require('dotenv').config()
 
 // Validate required environment variables
-const requiredEnvVars = ['MONGO_URL', 'JWT_SECRET'];
+const requiredEnvVars = ['MONGO_URL', 'JWT_SECRET', 'GEMINI_API_KEY'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
@@ -38,6 +39,7 @@ app.use(express.json())
 
 app.use('/transactions', transactionRouter);
 app.use('/auth', authRouter)
+app.use('/chat', chatRouter)
 
 // Connect to database and start server
 const startServer = async () => {
