@@ -95,36 +95,32 @@ export default function Transaction() {
         })
     }
 
-    const categoryOptions = options.map(opt => <option key={uuidv4()} value = {opt} >{opt}</option>)
+    const categoryOptions = options.map(opt => <option key={uuidv4()} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>)
 
     return (
         <div>
             <form id="my-form" className="my-form">
-            <h3 className="form-heading">Enter new transaction: </h3>
+            <h3 className="form-heading">{editMode ? "Edit Transaction" : "Add New Transaction"}</h3>
 
-            <select className="form-items type" name="type" id="type" value={trans.category} onChange={handleCategoryChange } >
-                <option value="" >Category</option>
-            {categoryOptions}
-            <option value = "addNew">Add a new category</option>
+            <select className="form-items type" name="category" id="category" value={trans.category} onChange={handleCategoryChange} required>
+                <option value="">Select Category</option>
+                {categoryOptions}
+                <option value="addNew">+ Add New Category</option>
             </select>
 
             <br />
-            <input className="form-items" id="amount" type="number" min={0} placeholder="Amount" value={trans.amount} onChange={handleAmountChange} />
+            <input className="form-items" id="amount" type="number" min={0} step="0.01" placeholder="Amount (₹)" value={trans.amount} onChange={handleAmountChange} required />
             <br />
         
-            <select className="form-items type" name="type" id="type" onChange={handleTypeChange} value={trans.type} >
-                
-                <option>Type</option>
-                <option value="budget">Budget</option>
-                <option value="expense">Expense</option>
-                
+            <select className="form-items type" name="type" id="type" onChange={handleTypeChange} value={trans.type} required>
+                <option value="">Select Type</option>
+                <option value="budget">💰 Income</option>
+                <option value="expense">💸 Expense</option>
             </select>
             
-            
-            <button className="form-items submit-btn" onClick = {handleSubmit} disabled={loading}>
-                {loading ? "Processing..." : (editMode ? "Edit" : "Submit")}
+            <button className="form-items submit-btn" onClick={handleSubmit} disabled={loading}>
+                {loading ? "Processing..." : (editMode ? "Update Transaction" : "Add Transaction")}
             </button>
-            
             
             </form>
             

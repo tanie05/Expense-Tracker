@@ -126,18 +126,18 @@ const listOfTransactions = displayData.map(trans => {
   let classNameIs = ""
   trans.type==="budget" ? classNameIs += "list-item budget": classNameIs += "list-item expense"
   return(
-      <li key={trans._id} className= {classNameIs} >
-      <table style= {{width:"100% "}}>
+      <li key={trans._id} className={classNameIs}>
+      <table style={{width:"100%"}}>
         <tbody>
         <tr>
-              <td style= {{width:"50%"}}> {trans.category? trans.category:"Transaction"}</td>
-              <td style={{width: "20%"}}>Rs. {trans.amount? trans.amount:0}</td>
-              <td><button  className="del-btn submit-btn" onClick={() => handleDelete(trans._id)}>Delete</button></td>
-              <td><Link className="edit-btn submit-btn" to= {`/?id=${trans._id}&amount=${trans.amount}&type=${trans.type}&category=${trans.category}`} >Edit</Link></td>
-    
+              <td style={{width:"50%"}}>
+                {trans.category ? trans.category.charAt(0).toUpperCase() + trans.category.slice(1) : "Transaction"}
+              </td>
+              <td style={{width: "20%"}}>₹{trans.amount ? trans.amount : 0}</td>
+              <td><button className="del-btn submit-btn" onClick={() => handleDelete(trans._id)}>Delete</button></td>
+              <td><Link className="edit-btn submit-btn" to={`/?id=${trans._id}&amount=${trans.amount}&type=${trans.type}&category=${trans.category}`}>Edit</Link></td>
           </tr>
         </tbody>
-          
       </table>
   </li>
   )
@@ -145,23 +145,42 @@ const listOfTransactions = displayData.map(trans => {
   return (
     <div className="listOfTrans">
       
-      {displayData.length>0 &&<h1 className="history-heading">List of Transactions</h1>}
-      <div className="totals">
-            <h2 className="totals-budget">Total Earned   Rs.{budget}</h2>
-            <h2 className="totals-expense">Total Expense   Rs.{expense}</h2>
-      </div>
+      {displayData.length > 0 && <h1 className="history-heading">List of Transactions</h1>}
       
-      {displayData.length>0
-      &&<form className="filterform" id='filter-form'>
-            <input className="filterformele form-items" type="text" placeholder="filter by category" value={categoryFilter} onChange={handleCategoryFilterChange} />
-            <br/>
-            <input className="filterformele form-items" type="text" placeholder="filter by type" value={typeFilter} onChange={handleTypeFilterChange} />
-            <br/>
-            <button className="filterformele form-items submit-btn" onClick = {handleFilterSubmit} >Find</button>
-            <button className="filterformele form-items submit-btn" onClick = {handleReset} >Reset</button>
+      {displayData.length > 0 && (
+        <>
+          <div className="balance-card">
+            <h3>Current Balance</h3>
+            <h2 className={budget - expense >= 0 ? "balance-positive" : "balance-negative"}>
+              ₹{budget - expense}
+            </h2>
+          </div>
+          <div className="totals">
+                <h2 className="totals-budget">Total Earned: ₹{budget}</h2>
+                <h2 className="totals-expense">Total Expense: ₹{expense}</h2>
+          </div>
+        </>
+      )}
+      
+      {displayData.length > 0 && (
+        <form className="filterform" id='filter-form'>
+              <input className="filterformele form-items" type="text" placeholder="Filter by category" value={categoryFilter} onChange={handleCategoryFilterChange} />
+              <br/>
+              <input className="filterformele form-items" type="text" placeholder="Filter by type" value={typeFilter} onChange={handleTypeFilterChange} />
+              <br/>
+              <button className="filterformele form-items submit-btn" onClick={handleFilterSubmit}>Find</button>
+              <button className="filterformele form-items submit-btn" onClick={handleReset}>Reset</button>
         </form>   
-      } 
-      <div className="list">{listOfTransactions}</div>          
+      )}
+      
+      {displayData.length > 0 ? (
+        <div className="list">{listOfTransactions}</div>
+      ) : (
+        <div className="empty-state">
+          <h3>No Transactions Yet</h3>
+          <p>Start by adding your first transaction to track your finances!</p>
+        </div>
+      )}
     </div>
   )
 }
