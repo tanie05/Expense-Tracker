@@ -39,28 +39,38 @@ export default function Login() {
   }
 
   return (
-    <form id="my-form" className="my-form" onSubmit={loginUser}>
-            <h3 className="form-heading">Login Details</h3>
+    <div className="auth-container">
+      <div className="auth-header">
+        <h1 className="auth-title">💰 Expense Tracker</h1>
+        <p className="auth-subtitle">Manage your finances with ease</p>
+      </div>
+      <form id="my-form" className="my-form" onSubmit={loginUser}>
+              <h3 className="form-heading">Welcome Back!</h3>
 
-            <input 
+              <input 
+                className="form-items" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder='Username'
+                required
+              />
+              <br />
+
+              <input 
               className="form-items" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder='Username'
-            />
-            <br />
+              type="password"  
+              placeholder="Password" 
+              value={pw}
+              onChange={(e) => setPw(e.target.value)} 
+              required
+              />
+              <br />
 
-            <input 
-            className="form-items" 
-            type="password"  
-            placeholder="Password" 
-            value={pw}
-            onChange={(e) => setPw(e.target.value)} 
-            />
-            <br />
-
-            <input className="form-items submit-btn" type='submit' value={loading ? "Logging in..." : "Login"} disabled={loading} />
-            <div><a href='/register'>Register</a></div>
-    </form>
+              <button className="form-items submit-btn" type='submit' disabled={loading}>
+                {loading ? "Logging in..." : "Login"}
+              </button>
+              <div className="auth-link">Don't have an account? <a href='/register'>Register here</a></div>
+      </form>
+    </div>
   )
 }

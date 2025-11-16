@@ -54,42 +54,50 @@ export default function Register() {
     return (<Navigate to = {'/'} />)
   }
   return (
-    <form id="my-form" className="my-form" onSubmit={registerUser}>
-            <h3 className="form-heading">Register: </h3>
+    <div className="auth-container">
+      <div className="auth-header">
+        <h1 className="auth-title">💰 Expense Tracker</h1>
+        <p className="auth-subtitle">Start managing your finances today</p>
+      </div>
+      <form id="my-form" className="my-form" onSubmit={registerUser}>
+              <h3 className="form-heading">Create Your Account</h3>
 
-            <input 
-              className="form-items" 
-              type="text" 
-              placeholder="Username"
-              onChange={(e) => handleNameChange(e)}
-              value={user.username}
-              required
-              minLength={3}
-            />
-            <br />
-            <input 
-              className="form-items" 
-              type="email" 
-              placeholder="Email"
-              onChange={(e) => handleEmailChange(e)}
-              value={user.email}
-              required
-            />
-            <br />
-            <input 
-              className="form-items" 
-              type="password"  
-              placeholder="Password" 
-              onChange={(e) => handlePasswordChange(e)}
-              value={user.password}
-              required
-              minLength={6}
-            />
-            <br />
+              <input 
+                className="form-items" 
+                type="text" 
+                placeholder="Username"
+                onChange={(e) => handleNameChange(e)}
+                value={user.username}
+                required
+                minLength={3}
+              />
+              <br />
+              <input 
+                className="form-items" 
+                type="email" 
+                placeholder="Email"
+                onChange={(e) => handleEmailChange(e)}
+                value={user.email}
+                required
+              />
+              <br />
+              <input 
+                className="form-items" 
+                type="password"  
+                placeholder="Password" 
+                onChange={(e) => handlePasswordChange(e)}
+                value={user.password}
+                required
+                minLength={6}
+              />
+              <br />
 
-            <input type='submit' value={loading ? "Registering..." : "Register"} className="form-items submit-btn" disabled={loading}/>
+              <button type='submit' className="form-items submit-btn" disabled={loading}>
+                {loading ? "Registering..." : "Register"}
+              </button>
 
-            <div>Already a user?<a href='/login'>Login</a></div>
-    </form>
+              <div className="auth-link">Already a user? <a href='/login'>Login here</a></div>
+      </form>
+    </div>
   )
 }
