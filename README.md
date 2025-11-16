@@ -1,9 +1,4 @@
 # Expense Tracker
-
-Link - https://fascinating-jalebi-705ff3.netlify.app/
-
-<img width="656" alt="image" src="https://github.com/tanie05/Expense-Tracker-using-MERN-Stack/assets/91317220/39e1f635-42e5-4860-befb-42d6b365fd09">
-
 ## About
 
 A full-stack expense tracking application built with the MERN stack, featuring AI-powered natural language interaction for seamless financial management.
