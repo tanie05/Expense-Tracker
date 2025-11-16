@@ -1,8 +1,8 @@
 import React from 'react'
-import Home from "./pages/Home.js"
-import Login from './pages/Login'
-import Register from "./pages/Register";
-import List from "./pages/List"
+import Home from "./pages/home.js"
+import Login from './pages/login'
+import Register from "./pages/register";
+import List from "./pages/list"
 import {UserContextProvider} from './UserContext'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 

@@ -1,20 +1,20 @@
-import React from "react";
-import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
-import { useLocation } from 'react-router-dom';
-import {UserContext} from "../UserContext"
-import { useContext } from "react";
-import baseUrl from "../appConfig";
+import React, { useContext } from "react"
+import { v4 as uuidv4 } from "uuid"
+import { useLocation, useNavigate } from 'react-router-dom'
+import { UserContext } from "../UserContext"
+import api from "../utils/api"
 
 export default function Transaction() {
     
     // const usernam = useContext(UserContext)
     const { value, updateValue } = useContext(UserContext);
+    const navigate = useNavigate();
 
-    const dateAdded = "2023-06-24T06:57:23.401Z"
+    const dateAdded = new Date().toISOString()
     const [trans, setTrans] = React.useState({username: value, amount:0, category: "", type: "expense", date: dateAdded });
     
     const [options, setOptions] = React.useState(["food", "transport", "rent", "electricity", "taxes", "health"]);
+    const [loading, setLoading] = React.useState(false);
     
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -33,7 +33,7 @@ export default function Transaction() {
                 return {...prevTrans, amount: fetchedAmount, category: fetchedCategory, type: fetchedType}
             })
         }
-    }, [])
+    }, [fetchedId, fetchedAmount, fetchedCategory, fetchedType])
 
     
     
@@ -54,24 +54,28 @@ export default function Transaction() {
     
         if (value.length === 0) {
             alert('Login to create a transaction!');
-            window.location = "/login";
+            navigate("/login");
             return;
         }
     
+        setLoading(true);
         try {
             if (!editMode) {
-                const res = await axios.post(`${baseUrl}/transactions/add`, trans);
+                const res = await api.post(`/transactions/add`, trans);
                 console.log(res.data);
                 document.getElementById("my-form").reset();
+                alert('Transaction added successfully!');
             } else {
-                const res = await axios.put(`${baseUrl}/transactions/${fetchedId}`, trans);
+                const res = await api.put(`/transactions/${fetchedId}`, trans);
                 console.log(res);
                 setEditMode(false);
                 document.getElementById("my-form").reset();
-                window.location = "/view";
+                navigate("/view");
             }
         } catch (error) {
-            alert(error);
+            alert(error.response?.data?.message || 'Transaction failed');
+        } finally {
+            setLoading(false);
         }
     }
     
@@ -117,7 +121,9 @@ export default function Transaction() {
             </select>
             
             
-            <button className="form-items submit-btn" onClick = {handleSubmit} >{editMode?"Edit":"submit"}</button>
+            <button className="form-items submit-btn" onClick = {handleSubmit} disabled={loading}>
+                {loading ? "Processing..." : (editMode ? "Edit" : "Submit")}
+            </button>
             
             
             </form>
