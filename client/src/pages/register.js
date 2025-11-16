@@ -1,14 +1,15 @@
-import React, {useContext} from 'react'
-import '../style.css'
+import React, { useContext } from 'react'
 import axios from 'axios'
-import {UserContext} from '../UserContext'
-import { Navigate } from 'react-router-dom'
+import { UserContext } from '../UserContext'
+import { Navigate, useNavigate } from 'react-router-dom'
 import baseUrl from '../appConfig'
+import '../style.css'
 
 export default function Register() {
 
   const [user, setUser] = React.useState({username: "", email: "", password: ""})
   const [flag, setFlag] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const { setValue } = useContext(UserContext);
   
   function handleNameChange(event){
@@ -28,28 +29,26 @@ export default function Register() {
         return {...prevUser, password: event.target.value }
     })
   }
-  function registerUser(event){
+  async function registerUser(event){
     event.preventDefault();
-    axios.post(`${baseUrl}/auth/register`, user)
-      .then(res => {
-        if(res.data.success === true){
+    setLoading(true);
+    
+    try {
+      const res = await axios.post(`${baseUrl}/auth/register`, user);
+      if(res.data.success === true){
         setValue(user.username)
         localStorage.setItem('user', user.username);
+        localStorage.setItem('token', res.data.token);
         setFlag(true)
-        // const nameVal = res.data.user.username;
-        // setValue(nameVal);
-        // localStorage.setItem('user', nameVal);
-        // setFlag(true)
-
       }
-        else{
-          alert(res.data.message)
-          window.location = "/register"
-        }
-        }
-        )
-        .catch(err => alert("Some error occured!"));
-      
+      else{
+        alert(res.data.message)
+        setLoading(false);
+      }
+    } catch(err) {
+      alert(err.response?.data?.message || "Registration failed!");
+      setLoading(false);
+    }
   }
   if(flag){
     return (<Navigate to = {'/'} />)
@@ -64,14 +63,17 @@ export default function Register() {
               placeholder="Username"
               onChange={(e) => handleNameChange(e)}
               value={user.username}
+              required
+              minLength={3}
             />
             <br />
             <input 
               className="form-items" 
-              type="text" 
+              type="email" 
               placeholder="Email"
               onChange={(e) => handleEmailChange(e)}
               value={user.email}
+              required
             />
             <br />
             <input 
@@ -80,10 +82,12 @@ export default function Register() {
               placeholder="Password" 
               onChange={(e) => handlePasswordChange(e)}
               value={user.password}
+              required
+              minLength={6}
             />
             <br />
 
-            <input type='submit' value="Register" className="form-items submit-btn"/>
+            <input type='submit' value={loading ? "Registering..." : "Register"} className="form-items submit-btn" disabled={loading}/>
 
             <div>Already a user?<a href='/login'>Login</a></div>
     </form>

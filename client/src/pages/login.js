@@ -1,8 +1,7 @@
-import React, { useContext }  from 'react'
-import { useState } from 'react'
-import axios from 'axios';
-import {UserContext} from '../UserContext'
-import { Navigate } from 'react-router-dom';
+import React, { useContext, useState } from 'react'
+import axios from 'axios'
+import { UserContext } from '../UserContext'
+import { Navigate, useNavigate } from 'react-router-dom'
 import baseUrl from '../appConfig'
 
 export default function Login() {
@@ -11,29 +10,29 @@ export default function Login() {
   const [redirect,setRedirect] = useState(false);
   const [name,setName] = useState("")
   const [pw,setPw] = useState("")
+  const [loading, setLoading] = useState(false);
 
-  function loginUser(event){
+  async function loginUser(event){
     
     event.preventDefault();
+    setLoading(true);
 
-    axios.post(`${baseUrl}/auth/login`, {"username" : name, "password" : pw})
-      .then(res => {
-        if(res.data.success === true){
+    try {
+      const res = await axios.post(`${baseUrl}/auth/login`, {"username" : name, "password" : pw});
+      if(res.data.success === true){
         setValue(name)
         localStorage.setItem('user', name);
+        localStorage.setItem('token', res.data.token);
         setRedirect(true)
       }
       else{
         alert(res.data.message)
-        window.location = "/login"
+        setLoading(false);
       }
-      }
-      )
-      .catch((err) => {
-        alert(err)
-        window.location = "/login"
-      })
-        
+    } catch(err) {
+      alert(err.response?.data?.message || "Login failed")
+      setLoading(false);
+    }
   }
   if(redirect) {
     return <Navigate to={'/'} />
@@ -60,7 +59,7 @@ export default function Login() {
             />
             <br />
 
-            <input className="form-items submit-btn" type='submit' value="Login" />
+            <input className="form-items submit-btn" type='submit' value={loading ? "Logging in..." : "Login"} disabled={loading} />
             <div><a href='/register'>Register</a></div>
     </form>
   )

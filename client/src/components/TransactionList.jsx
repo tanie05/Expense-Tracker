@@ -1,11 +1,11 @@
 import React, { useContext } from 'react'
-import axios from 'axios'
-import { Link } from 'react-router-dom'
-import {UserContext} from '../UserContext'
-import baseUrl from '../appConfig'
+import { Link, useNavigate } from 'react-router-dom'
+import { UserContext } from '../UserContext'
+import api from '../utils/api'
 export default function TransactionList() {
  
   const { value } = useContext(UserContext);
+  const navigate = useNavigate();
 
 
   const [data, setData] = React.useState([]);
@@ -15,16 +15,38 @@ export default function TransactionList() {
 
   const fetchInfo = async () => { 
     if(value.length > 0){
-      const response = await axios.get(`${baseUrl}/transactions/${value}`);
+      const response = await api.get(`/transactions/${value}`);
       setData(response.data);
       setDisplayData(response.data);
     }
     
   }
   
-  React.useEffect(() => { 
-        fetchInfo(); 
-  },[])
+  React.useEffect(() => {
+        let isMounted = true;
+        
+        const loadData = async () => {
+            if (isMounted && value.length > 0) {
+                try {
+                    const response = await api.get(`/transactions/${value}`);
+                    if (isMounted) {
+                        setData(response.data);
+                        setDisplayData(response.data);
+                    }
+                } catch (error) {
+                    if (isMounted) {
+                        console.error('Error fetching transactions:', error);
+                    }
+                }
+            }
+        };
+        
+        loadData();
+        
+        return () => {
+            isMounted = false;
+        };
+  }, [value])
   React.useEffect(() => {
     setBudget(calculateBudget(displayData));
     setExpense(calculateExpense(displayData));
@@ -88,11 +110,12 @@ function handleReset(event) {
 }
 const handleDelete = async (id) => {
   try {
-    await axios.delete(`${baseUrl}/transactions/${id}`)
+    await api.delete(`/transactions/${id}`)
     console.log('Item successfully deleted.')
-    window.location.reload(false)
+    // Refetch data instead of reloading the page
+    await fetchInfo();
   } catch (error) {
-    alert(error)
+    alert(error.response?.data?.message || 'Failed to delete transaction')
   }
 }
 
