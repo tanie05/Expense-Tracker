@@ -356,15 +356,6 @@ npm run build
 
 This creates an optimized production build in the `client/build` folder.
 
-### Deploy
-- Backend can be deployed to platforms like Render, Heroku, or Railway
-- Frontend can be deployed to Netlify, Vercel, or served by the backend
-- Feature Flag Service can be deployed to platforms like Render, Railway, or Heroku
-- Update environment variables in production accordingly
-- For production, use PostgreSQL or MySQL for the feature flag service instead of SQLite
-- Ensure `FEATURE_FLAG_SERVICE_URL` points to your production feature flag service URL
-
----
 
 ## Technologies Used
 
@@ -404,24 +395,6 @@ This creates an optimized production build in the `client/build` folder.
 - Feature flags are checked during login/registration and stored in localStorage
 - The AI chatbot feature is controlled by the `ai_chatbot` feature flag
 - Feature flags support both global flags and user-specific overrides
-
----
-
-## Support
-
-If you encounter any issues not covered in this guide:
-1. Check that all dependencies are installed correctly (Node.js and Python)
-2. Verify environment variables are set properly in all three services
-3. Ensure all three services are running (feature flag, backend, frontend)
-4. Check browser console and terminal for error messages
-5. Verify that `FEATURE_FLAG_SECRET` matches between backend and feature flag service
-6. See the [Feature Flag Service README](feature-flag/README.md) for detailed feature flag documentation
-
----
-
-## License
-
-ISC
 
 ---
 
