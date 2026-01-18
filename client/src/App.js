@@ -7,10 +7,15 @@ import ChatWidget from './components/ChatWidget'
 import {UserContextProvider, UserContext} from './UserContext'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
-// Component to conditionally render ChatWidget based on authentication
+// Component to conditionally render ChatWidget based on authentication and feature flag
 function AppContent() {
   const { value } = useContext(UserContext);
   const token = localStorage.getItem('token');
+  
+  // Get feature flags from localStorage (set during login/register)
+  const featuresStr = localStorage.getItem('features');
+  const features = featuresStr ? JSON.parse(featuresStr) : {};
+  const chatbotEnabled = features.chatbot === true;
 
   return (
     <>
@@ -20,8 +25,8 @@ function AppContent() {
         <Route path="/login" element={<Login/>} />
         <Route path="/register" element={<Register/>} />
       </Routes>
-      {/* Only show chat widget when user is authenticated */}
-      {value && token && <ChatWidget />}
+      {/* Only show chat widget when user is authenticated AND feature is enabled */}
+      {value && token && chatbotEnabled && <ChatWidget />}
     </>
   );
 }

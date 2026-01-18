@@ -39,6 +39,10 @@ export default function Register() {
         setValue(user.username)
         localStorage.setItem('user', user.username);
         localStorage.setItem('token', res.data.token);
+        // Store feature flags
+        if (res.data.features) {
+          localStorage.setItem('features', JSON.stringify(res.data.features));
+        }
         setFlag(true)
       }
       else{

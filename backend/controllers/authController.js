@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel")
 const { comparePassword, hashPassword } = require("../helper/authHelper")
 const JWT = require("jsonwebtoken")
+const { isFeatureEnabled } = require("../helper/featureFlagHelper")
 
 const registerController = async (req,res) =>{
 
@@ -59,6 +60,10 @@ const registerController = async (req,res) =>{
             expiresIn: "7d",
         });
 
+        // Check chatbot feature flag
+        const userId = user._id.toString();
+        const { enabled: chatbotEnabled } = await isFeatureEnabled(userId, 'ai_chatbot');
+
         res.status(201).send({
             success:true, 
             message: "User registered successfully",
@@ -67,7 +72,10 @@ const registerController = async (req,res) =>{
                 username: user.username,
                 email: user.email
             },
-            token
+            token,
+            features: {
+                chatbot: chatbotEnabled
+            }
         })
         
 
@@ -114,6 +122,11 @@ const loginController = async (req, res) => {
       const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "7d",
       });
+
+      // Check chatbot feature flag
+      const userId = user._id.toString();
+      const { enabled: chatbotEnabled } = await isFeatureEnabled(userId, 'ai_chatbot');
+
       res.status(200).send({
         success: true,
         message: "Login successfully",
@@ -123,6 +136,9 @@ const loginController = async (req, res) => {
           email: user.email
         },
         token,
+        features: {
+          chatbot: chatbotEnabled
+        }
       });
     } catch (error) {
       console.log(error);
