@@ -23,6 +23,10 @@ export default function Login() {
         setValue(name)
         localStorage.setItem('user', name);
         localStorage.setItem('token', res.data.token);
+        // Store feature flags
+        if (res.data.features) {
+          localStorage.setItem('features', JSON.stringify(res.data.features));
+        }
         setRedirect(true)
       }
       else{

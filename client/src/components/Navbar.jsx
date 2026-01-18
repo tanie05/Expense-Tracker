@@ -1,23 +1,19 @@
 import React, { useContext, useState } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import {UserContext} from '../UserContext'
-import { Navigate } from 'react-router-dom';
 
 export default function Navbar() {
   
-
+  const navigate = useNavigate();
   const {value,setValue } = useContext(UserContext);
   const [redirect, setRedirect] = useState(false);
 
 
-  function handleClick() {
-    localStorage.clear()
+  function handleClick(event) {
+    event.preventDefault();
     setValue("")
     localStorage.clear();
-    setRedirect(true)
-  }
-  if(redirect) {
-    return <Navigate to={'/'} />
+    navigate('/login');
   }
 
   return (
