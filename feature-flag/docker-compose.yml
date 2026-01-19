@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:15
+    container_name: ff-postgres
+    environment:
+      POSTGRES_USER: tanvis
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: feature_flag
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    container_name: feature-flag-service
+    ports:
+      - "5001:5001"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://tanvis:postgres@db:5432/feature_flag
+      SQLALCHEMY_TRACK_MODIFICATIONS: "False"
+      FEATURE_FLAG_SECRET: 364533b81474bb172a34fc91685ae3656c5fc18d9b60997c16612348cd9f3fd8
+    restart: unless-stopped
+
+volumes:
+  pgdata:

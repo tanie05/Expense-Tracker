@@ -10,7 +10,7 @@ const http = require('http');
 async function isFeatureEnabled(userId, featureName) {
   try {
     // Read from process.env at runtime, not at module load time
-    const FEATURE_FLAG_SERVICE_URL = process.env.FEATURE_FLAG_SERVICE_URL || 'http://127.0.0.1:5001';
+    const FEATURE_FLAG_SERVICE_URL = process.env.FEATURE_FLAG_SERVICE_URL || 'http://feature-flag:5001';
     const FEATURE_FLAG_SECRET = process.env.FEATURE_FLAG_SECRET;
 
     if (!FEATURE_FLAG_SECRET) {
@@ -18,11 +18,8 @@ async function isFeatureEnabled(userId, featureName) {
       return { enabled: false, source: 'error' };
     }
 
-    // Force IPv4 by using 127.0.0.1 if localhost is detected
-    let serviceUrl = FEATURE_FLAG_SERVICE_URL;
-    if (serviceUrl.includes('localhost')) {
-      serviceUrl = serviceUrl.replace('localhost', '127.0.0.1');
-    }
+    // Use the service URL as-is (Docker service names work directly)
+    const serviceUrl = FEATURE_FLAG_SERVICE_URL;
 
     // Create HTTP agent that forces IPv4
     const httpAgent = new http.Agent({
