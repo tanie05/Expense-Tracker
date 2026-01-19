@@ -1,0 +1,89 @@
+services:
+  # MongoDB for Backend
+  mongo:
+    image: mongo:latest
+    container_name: expense-tracker-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+  # PostgreSQL for Feature Flag Service
+  postgres:
+    image: postgres:15-alpine
+    container_name: expense-tracker-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  # Feature Flag Service (Flask)
+  feature-flag:
+    build:
+      context: ./feature-flag
+      dockerfile: Dockerfile
+    container_name: feature-flag-service
+    ports:
+      - "5001:5001"
+    depends_on:
+      - postgres
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      SQLALCHEMY_TRACK_MODIFICATIONS: "False"
+      FEATURE_FLAG_SECRET: ${FEATURE_FLAG_SECRET}
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Backend (Node.js/Express)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: expense-tracker-backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+      - feature-flag
+    environment:
+      MONGO_URL: ${MONGO_URL:-mongodb://mongo:27017/expense-tracker}
+      JWT_SECRET: ${JWT_SECRET}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PORT: 5000
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
+      FEATURE_FLAG_SERVICE_URL: ${FEATURE_FLAG_SERVICE_URL:-http://feature-flag:5001}
+      FEATURE_FLAG_SECRET: ${FEATURE_FLAG_SECRET}
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Frontend (React)
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: expense-tracker-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  postgres_data:
