@@ -2,28 +2,44 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const transactionSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
+  user_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  amount: {
-    type: Number,
+  category_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'Category',
     required: true,
-  },
-  category: {
-    type: String,
   },
   type: {
     type: String,
     required: true,
+    enum: ['income', 'expense']
   },
-  date: { 
-    type: Date, 
-    required: true 
-},
-  
+  amount: {
+    type: Number,
+    required: true
+  },
+  currency: {
+    type: String,
+    required: true,
+    default: 'INR'
+  },
+  description: {
+    type: String,
+    trim: true
+  },
+  date: {
+    type: Date,
+    required: true
+  },
+  is_recurring: {
+    type: Boolean,
+    default: false
+  }
 }, {
-  timestamps: true,
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);

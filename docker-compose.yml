@@ -62,6 +62,9 @@ services:
       CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
       FEATURE_FLAG_SERVICE_URL: ${FEATURE_FLAG_SERVICE_URL:-http://feature-flag:5001}
       FEATURE_FLAG_SECRET: ${FEATURE_FLAG_SECRET}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     networks:
       - app-network
     restart: unless-stopped

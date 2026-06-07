@@ -11,13 +11,15 @@ const requiredSignIn = async(req,res,next) => {
             });
         }
         
-        const decode = JWT.verify(
-            req.headers.authorization, 
-            process.env.JWT_SECRET
-        );
+        const token = req.headers.authorization.startsWith('Bearer ')
+            ? req.headers.authorization.split(' ')[1]
+            : req.headers.authorization;
         
+
+        const decode = JWT.verify(token, process.env.JWT_SECRET);
+
         // Fetch full user details from database
-        const user = await userModel.findById(decode._id).select('-password');
+        const user = await userModel.findById(decode._id).select('-password_hash');
         if (!user) {
             return res.status(401).send({
                 success: false,
