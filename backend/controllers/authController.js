@@ -31,18 +31,8 @@ const registerController = async (req,res) =>{
             return res.status(400).send({success: false, message: "Password must be at least 6 characters long"})
         }
 
-        //check user
-        const existingUser = await userModel.findOne({username})
-        //check existing user
-        if(existingUser){
-            return res.status(400).send({
-                success: false,
-                message: "Already registered please login"
-            })
-        }
-        
         // Check if email already exists
-        const existingEmail = await userModel.findOne({email})
+        const existingEmail = await userModel.findOne({ email })
         if(existingEmail){
             return res.status(400).send({
                 success: false,
@@ -51,9 +41,9 @@ const registerController = async (req,res) =>{
         }
 
         //register user
-        const hashedPassword = await hashPassword(password)
+        const password_hash = await hashPassword(password)
         //save
-        const user = await new userModel({username,password:hashedPassword,email}).save()
+        const user = await new userModel({username, password_hash, email}).save()
         
         //token
         const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
@@ -91,30 +81,30 @@ const registerController = async (req,res) =>{
 //POST LOGIN
 const loginController = async (req, res) => {
     try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
         return res.status(400).send({
           success: false,
-          message: "Username and password are required",
+          message: "Email and password are required",
         });
       }
 
-      const user = await userModel.findOne({username});
-      
+      const user = await userModel.findOne({ email });
+
       if (!user) {
         return res.status(401).send({
           success: false,
-          message: "Invalid username or password",
+          message: "Invalid email or password",
         });
       }
 
-      const match = await comparePassword(password, user.password);
+      const match = await comparePassword(password, user.password_hash);
 
       if (!match) {
         return res.status(401).send({
           success: false,
-          message: "Invalid username or password",
+          message: "Invalid email or password",
         });
       }
 

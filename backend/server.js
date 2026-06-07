@@ -5,6 +5,8 @@ const mongoose = require('mongoose')
 const transactionRouter =  require('./routes/transactionRouter')
 const authRouter = require('./routes/authRouter')
 const chatRouter = require('./routes/chatRouter')
+const categoryRouter = require('./routes/categoryRouter')
+const userRouter = require('./routes/userRouter')
 
 require('dotenv').config()
 
@@ -40,7 +42,8 @@ app.use(express.json())
 app.use('/transactions', transactionRouter);
 app.use('/auth', authRouter)
 app.use('/chat', chatRouter)
-
+app.use('/categories', categoryRouter)
+app.use('/', userRouter)
 // Connect to database and start server
 const startServer = async () => {
     try {
