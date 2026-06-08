@@ -7,7 +7,7 @@ const authRouter = require('./routes/authRouter')
 const chatRouter = require('./routes/chatRouter')
 const categoryRouter = require('./routes/categoryRouter')
 const userRouter = require('./routes/userRouter')
-
+const dashboardRouter = require('./routes/dashboard')
 require('dotenv').config()
 
 // Validate required environment variables
@@ -44,6 +44,7 @@ app.use('/auth', authRouter)
 app.use('/chat', chatRouter)
 app.use('/categories', categoryRouter)
 app.use('/', userRouter)
+app.use('/dashboard', dashboardRouter)
 // Connect to database and start server
 const startServer = async () => {
     try {

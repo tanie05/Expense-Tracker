@@ -1,23 +1,21 @@
-const router = require('express').Router();
-const { handleChatMessage, getUserContext } = require('../controllers/chatController');
-const { requiredSignIn } = require('../middlewares/authMiddleware');
-const { requireFeatureFlag } = require('../middlewares/featureFlagMiddleware');
-const rateLimit = require('express-rate-limit');
+const router = require("express").Router()
+const { handleChatMessage, getUserContext } = require("../controllers/chatController")
+const { requiredSignIn } = require("../middlewares/authMiddleware")
+const { requireFeatureFlag } = require("../middlewares/featureFlagMiddleware")
+const validate = require("../middlewares/validate")
+const { sendMessage } = require("../validators/chatValidators")
+const rateLimit = require("express-rate-limit")
 
-// Rate limiter for chat endpoint to prevent API abuse
 const chatLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 20, // limit each user to 20 requests per minute
-  message: 'Too many chat requests, please try again later.',
+  windowMs: 1 * 60 * 1000,
+  max: 20,
+  message: "Too many chat requests, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
-});
+})
 
-// POST /chat/message - Send a chat message and get AI response
-router.post('/message', requiredSignIn, requireFeatureFlag('ai_chatbot'), chatLimiter, handleChatMessage);
+router.post("/message", requiredSignIn, requireFeatureFlag("ai_chatbot"), chatLimiter, ...sendMessage, validate, handleChatMessage)
 
-// GET /chat/context/:username - Get user context (categories, recent transactions)
-router.get('/context/:username', requiredSignIn, requireFeatureFlag('ai_chatbot'), getUserContext);
+router.get("/context/:username", requiredSignIn, requireFeatureFlag("ai_chatbot"), getUserContext)
 
-module.exports = router;
-
+module.exports = router
