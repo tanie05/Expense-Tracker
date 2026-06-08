@@ -24,7 +24,7 @@ const tools = [
             type: {
               type: 'string',
               description: 'Optional type filter',
-              enum: ['budget', 'expense'],
+              enum: ['income', 'expense'],
             },
             startDate: {
               type: 'string',
@@ -59,7 +59,7 @@ const tools = [
             type: {
               type: 'string',
               description: 'Transaction type',
-              enum: ['budget', 'expense'],
+              enum: ['income', 'expense'],
             },
             date: {
               type: 'string',
@@ -90,7 +90,7 @@ const tools = [
             type: {
               type: 'string',
               description: 'New type',
-              enum: ['budget', 'expense'],
+              enum: ['income', 'expense'],
             },
           },
           required: ['transactionId'],
@@ -130,7 +130,7 @@ const tools = [
             type: {
               type: 'string',
               description: 'Optional type filter',
-              enum: ['budget', 'expense'],
+              enum: ['income', 'expense'],
             },
             startDate: {
               type: 'string',
@@ -214,8 +214,8 @@ async function createTransaction(args) {
     throw new Error('Category is required');
   }
 
-  if (!['budget', 'expense'].includes(type)) {
-    throw new Error('Type must be either "budget" or "expense"');
+  if (!['income', 'expense'].includes(type)) {
+    throw new Error('Type must be either "income" or "expense"');
   }
 
   const sanitizedCategory = category.trim().replace(/[<>]/g, '');
@@ -261,8 +261,8 @@ async function updateTransaction(args) {
   }
 
   if (type !== undefined) {
-    if (!['budget', 'expense'].includes(type)) {
-      throw new Error('Type must be either "budget" or "expense"');
+    if (!['income', 'expense'].includes(type)) {
+      throw new Error('Type must be either "income" or "expense"');
     }
     updateFields.type = type;
   }

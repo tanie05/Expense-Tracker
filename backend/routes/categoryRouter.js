@@ -1,68 +1,47 @@
 const router = require("express").Router()
-const Category = require('../models/categoryModel')
-const {requiredSignIn} = require('../middlewares/authMiddleware')
+const Category = require("../models/categoryModel")
+const { requiredSignIn } = require("../middlewares/authMiddleware")
+const validate = require("../middlewares/validate")
+const { createCategory, updateCategory } = require("../validators/categoryValidators")
 
-
-
-router.route('/')
+router.route("/")
   .get(requiredSignIn, (req, res) => {
     Category.find({
-        $or: [
-            {is_default: true},
-            {user_id: req.user._id}
-        ]
+      $or: [{ is_default: true }, { user_id: req.user._id }]
     })
       .then(categories => res.json(categories))
-      .catch(err => res.status(400).json('Error: ' + err));
+      .catch(() => res.status(400).json({ success: false, message: "Error fetching categories" }))
   })
 
-
-  .post(requiredSignIn, (req, res) => {
-    const { name } = req.body;
-
-    if (!name || typeof name !== 'string' || name.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Valid category name is required' });
-    }
-
+  .post(requiredSignIn, ...createCategory, validate, (req, res) => {
     const newCategory = new Category({
       user_id: req.user._id,
-      name: name.trim(),
-      is_default: req.body.is_default ? req.body.is_default : false
-    });
+      name: req.body.name.trim(),
+      is_default: req.body.is_default || false
+    })
 
     newCategory.save()
-      .then(() => res.json({ success: true, message: 'Category added!', category: newCategory }))
-      .catch(err => res.status(400).json({ success: false, message: 'Error adding category' }));
-  });
+      .then(() => res.json({ success: true, message: "Category added!", category: newCategory }))
+      .catch(() => res.status(400).json({ success: false, message: "Error adding category" }))
+  })
 
 router.route("/:id")
-  .put(requiredSignIn, (req, res) => {
-    const { name } = req.body;
-
-    if (!name || typeof name !== 'string' || name.trim() === '') {
-      return res.status(400).json({ success: false, message: 'Valid category name is required' });
-    }
-
-    Category.findByIdAndUpdate(req.params.id, {
-      name: name.trim()
-    }, { new: true })
+  .put(requiredSignIn, ...updateCategory, validate, (req, res) => {
+    Category.findByIdAndUpdate(req.params.id, { name: req.body.name.trim() }, { new: true })
       .then(category => {
-        if (!category) {
-          return res.status(404).json({ success: false, message: "Category not found" });
-        }
-        res.json({ success: true, message: "Category updated!", category });
+        if (!category) return res.status(404).json({ success: false, message: "Category not found" })
+        res.json({ success: true, message: "Category updated!", category })
       })
-      .catch(err => res.status(400).json('Error: ' + err));
+      .catch(() => res.status(400).json({ success: false, message: "Error updating category" }))
   })
+
   .delete(requiredSignIn, (req, res) => {
     Category.findByIdAndDelete(req.params.id)
-      .then((data) => {
-        if (!data) {
-          return res.status(404).json({ success: false, message: "Category not found" });
-        }
-        res.json({ success: true, message: "Category deleted!" });
+      .then(data => {
+        if (!data) return res.status(404).json({ success: false, message: "Category not found" })
+        res.json({ success: true, message: "Category deleted!" })
       })
-      .catch(err => res.status(400).json('Error: ' + err));
-  });
+      .catch(() => res.status(400).json({ success: false, message: "Error deleting category" }))
+  })
 
 module.exports = router
