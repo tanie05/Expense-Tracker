@@ -12,7 +12,6 @@ router.route("/")
   })
 
   .post(requiredSignIn, ...createTransaction, validate, (req, res) => {
-    console.log(req.body)
     const newTransaction = new Transaction({
       user_id: req.user._id,
       amount: parseFloat(req.body.amount),
@@ -20,8 +19,6 @@ router.route("/")
       date: Date.parse(req.body.date),
       type: req.body.type
     })
-    console.log('here')
-    console.log(newTransaction)
 
     newTransaction.save()
       .then(() => res.json({ success: true, message: "Transaction added!", transaction: newTransaction }))
