@@ -4,65 +4,26 @@ const Categories = require("../models/categoryModel")
 const { requiredSignIn } = require("../middlewares/authMiddleware")
 const validate = require("../middlewares/validate")
 const { createTransaction, updateTransaction } = require("../validators/transactionValidators")
+const { listTransactions, createTransactionDirect } = require("../services/transactionService")
 
 router.route("/")
   .get(requiredSignIn, async (req, res) => {
     try {
-      const transactions = await Transaction.aggregate([
-        { $match: { user_id: req.user._id } },
-        {
-          $lookup: {
-            from: 'categories',
-            localField: 'category_id',
-            foreignField: '_id',
-            as: 'category'
-          }
-        },
-        {
-          $addFields: {
-            category_name: { $arrayElemAt: ['$category.name', 0] }
-          }
-        },
-        { $project: { category: 0 } }
-      ])
-      res.json({ success: true, transactions })
+      const result = await listTransactions({}, req.user._id)
+      res.json({ success: true, transactions: result.transactions })
     } catch {
       res.status(500).json({ success: false, message: "Error fetching transactions" })
     }
   })
 
-  .post(requiredSignIn, ...createTransaction, validate, (req, res) => {
-    const newTransaction = new Transaction({
-      user_id: req.user._id,
-      amount: parseFloat(req.body.amount),
-      category_id: req.body.category_id,
-      date: Date.parse(req.body.date),
-      type: req.body.type,
-      description: req.body.description
-    })
-
-    newTransaction.save()
-      .then(async () => {
-        const [transaction] = await Transaction.aggregate([
-          { $match: { _id: newTransaction._id } },
-          {
-            $lookup: {
-              from: 'categories',
-              localField: 'category_id',
-              foreignField: '_id',
-              as: 'category'
-            }
-          },
-          {
-            $addFields: {
-              category_name: { $arrayElemAt: ['$category.name', 0] }
-            }
-          },
-          { $project: { category: 0 } }
-        ])
-        res.json({ success: true, message: "Transaction added!", transaction })
-      })
-      .catch(() => res.status(400).json({ success: false, message: "Error adding transaction" }))
+  .post(requiredSignIn, ...createTransaction, validate, async (req, res) => {
+    try {
+      const result = await createTransactionDirect(req.body, req.user._id)
+      
+      res.json(result)
+    } catch {
+      res.status(400).json({ success: false, message: "Error adding transaction" })
+    }
   })
 
 router.route("/:id")
@@ -77,11 +38,7 @@ router.route("/:id")
 
   .patch(requiredSignIn, ...updateTransaction, validate, async (req, res) => {
     try {
-      const updated = await Transaction.findByIdAndUpdate(
-        req.params.id,
-        { $set: req.body },
-        { new: true }
-      )
+      const updated = await Transaction.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
       if (!updated) return res.status(404).json({ success: false, message: "Transaction not found" })
       res.json({ success: true, message: "Updated successfully", transaction: updated })
     } catch {
