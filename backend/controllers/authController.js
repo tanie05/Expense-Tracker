@@ -5,7 +5,7 @@ const { isFeatureEnabled } = require("../helper/featureFlagHelper")
 
 const registerController = async (req, res) => {
   try {
-    const { username, password, email } = req.body
+    const { username, password, email, preferred_currency } = req.body
 
     const existingEmail = await userModel.findOne({ email })
     if (existingEmail) {
@@ -13,7 +13,7 @@ const registerController = async (req, res) => {
     }
 
     const password_hash = await hashPassword(password)
-    const user = await new userModel({ username, password_hash, email }).save()
+    const user = await new userModel({ username, password_hash, email, preferred_currency }).save()
 
     const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" })
 
@@ -22,7 +22,7 @@ const registerController = async (req, res) => {
     res.status(201).send({
       success: true,
       message: "User registered successfully",
-      user: { _id: user._id, username: user.username, email: user.email },
+      user: { _id: user._id, username: user.username, email: user.email, preferred_currency: user.preferred_currency },
       token,
       features: { chatbot: chatbotEnabled }
     })
@@ -53,7 +53,7 @@ const loginController = async (req, res) => {
     res.status(200).send({
       success: true,
       message: "Login successfully",
-      user: { _id: user._id, username: user.username, email: user.email },
+      user: { _id: user._id, username: user.username, email: user.email, preferred_currency: user.preferred_currency },
       token,
       features: { chatbot: chatbotEnabled }
     })

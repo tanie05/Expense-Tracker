@@ -5,10 +5,29 @@ const validate = require("../middlewares/validate")
 const { createTransaction, updateTransaction } = require("../validators/transactionValidators")
 
 router.route("/")
-  .get(requiredSignIn, (req, res) => {
-    Transaction.find({ user_id: req.user._id })
-      .then(transactions => res.json(transactions))
-      .catch(() => res.status(400).json({ success: false, message: "Error fetching transactions" }))
+  .get(requiredSignIn, async (req, res) => {
+    try {
+      const transactions = await Transaction.aggregate([
+        { $match: { user_id: req.user._id } },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category_id',
+            foreignField: '_id',
+            as: 'category'
+          }
+        },
+        {
+          $addFields: {
+            category_name: { $arrayElemAt: ['$category.name', 0] }
+          }
+        },
+        { $project: { category: 0 } }
+      ])
+      res.json({ success: true, transactions })
+    } catch {
+      res.status(500).json({ success: false, message: "Error fetching transactions" })
+    }
   })
 
   .post(requiredSignIn, ...createTransaction, validate, (req, res) => {
@@ -17,7 +36,8 @@ router.route("/")
       amount: parseFloat(req.body.amount),
       category_id: req.body.category_id,
       date: Date.parse(req.body.date),
-      type: req.body.type
+      type: req.body.type,
+      description: req.body.description
     })
 
     newTransaction.save()

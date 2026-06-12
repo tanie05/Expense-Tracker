@@ -24,7 +24,7 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 // CORS configuration with specific allowed origins
-const allowedOrigins = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : ['http://localhost:3000'];
+const allowedOrigins = ['http://localhost:5173'];
 app.use(cors({
     origin: function(origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)

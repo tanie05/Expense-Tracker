@@ -5,6 +5,8 @@ const {
   ListToolsRequestSchema,
 } = require('@modelcontextprotocol/sdk/types.js');
 const Transaction = require('../models/transactionModel');
+const Category = require('../models/categoryModel');
+const mongoose = require('mongoose');
 
 class ExpenseMCPServer {
   constructor() {
@@ -36,7 +38,6 @@ class ExpenseMCPServer {
   }
 
   setupToolHandlers() {
-    // List available tools
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
@@ -45,18 +46,18 @@ class ExpenseMCPServer {
           inputSchema: {
             type: 'object',
             properties: {
-              username: {
+              userId: {
                 type: 'string',
-                description: 'Username of the user',
+                description: 'MongoDB ObjectId of the user',
               },
               category: {
                 type: 'string',
-                description: 'Optional category filter',
+                description: 'Optional category name filter',
               },
               type: {
                 type: 'string',
-                description: 'Optional type filter (budget or expense)',
-                enum: ['budget', 'expense'],
+                description: 'Optional type filter (income or expense)',
+                enum: ['income', 'expense'],
               },
               startDate: {
                 type: 'string',
@@ -67,18 +68,18 @@ class ExpenseMCPServer {
                 description: 'Optional end date for filtering (ISO format)',
               },
             },
-            required: ['username'],
+            required: ['userId'],
           },
         },
         {
           name: 'create_transaction',
-          description: 'Create a new transaction (expense or budget)',
+          description: 'Create a new transaction (expense or income)',
           inputSchema: {
             type: 'object',
             properties: {
-              username: {
+              userId: {
                 type: 'string',
-                description: 'Username of the user',
+                description: 'MongoDB ObjectId of the user',
               },
               amount: {
                 type: 'number',
@@ -86,60 +87,23 @@ class ExpenseMCPServer {
               },
               category: {
                 type: 'string',
-                description: 'Transaction category',
+                description: 'Transaction category name',
               },
               type: {
                 type: 'string',
-                description: 'Transaction type (budget or expense)',
-                enum: ['budget', 'expense'],
+                description: 'Transaction type (income or expense)',
+                enum: ['income', 'expense'],
               },
               date: {
                 type: 'string',
                 description: 'Transaction date (ISO format)',
               },
-            },
-            required: ['username', 'amount', 'category', 'type', 'date'],
-          },
-        },
-        {
-          name: 'update_transaction',
-          description: 'Update an existing transaction',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              transactionId: {
+              description: {
                 type: 'string',
-                description: 'ID of the transaction to update',
-              },
-              amount: {
-                type: 'number',
-                description: 'New amount',
-              },
-              category: {
-                type: 'string',
-                description: 'New category',
-              },
-              type: {
-                type: 'string',
-                description: 'New type (budget or expense)',
-                enum: ['budget', 'expense'],
+                description: 'Optional description',
               },
             },
-            required: ['transactionId'],
-          },
-        },
-        {
-          name: 'delete_transaction',
-          description: 'Delete a transaction by ID',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              transactionId: {
-                type: 'string',
-                description: 'ID of the transaction to delete',
-              },
-            },
-            required: ['transactionId'],
+            required: ['userId', 'amount', 'category', 'type', 'date'],
           },
         },
         {
@@ -148,21 +112,21 @@ class ExpenseMCPServer {
           inputSchema: {
             type: 'object',
             properties: {
-              username: {
+              userId: {
                 type: 'string',
-                description: 'Username of the user',
+                description: 'MongoDB ObjectId of the user',
               },
               categories: {
                 type: 'array',
                 items: {
                   type: 'string',
                 },
-                description: 'Optional array of categories to include in summary',
+                description: 'Optional array of category names to include in summary',
               },
               type: {
                 type: 'string',
-                description: 'Optional type filter (budget or expense)',
-                enum: ['budget', 'expense'],
+                description: 'Optional type filter (income or expense)',
+                enum: ['income', 'expense'],
               },
               startDate: {
                 type: 'string',
@@ -173,13 +137,12 @@ class ExpenseMCPServer {
                 description: 'Optional end date (ISO format)',
               },
             },
-            required: ['username'],
+            required: ['userId'],
           },
         },
       ],
     }));
 
-    // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       try {
         switch (request.params.name) {
@@ -187,10 +150,6 @@ class ExpenseMCPServer {
             return await this.handleListTransactions(request.params.arguments);
           case 'create_transaction':
             return await this.handleCreateTransaction(request.params.arguments);
-          case 'update_transaction':
-            return await this.handleUpdateTransaction(request.params.arguments);
-          case 'delete_transaction':
-            return await this.handleDeleteTransaction(request.params.arguments);
           case 'get_summary':
             return await this.handleGetSummary(request.params.arguments);
           default:
@@ -210,30 +169,56 @@ class ExpenseMCPServer {
     });
   }
 
+  async findOrCreateCategory(categoryName, userId) {
+    const trimmed = categoryName.trim();
+    let category = await Category.findOne({
+      user_id: userId,
+      name: { $regex: new RegExp(`^${trimmed}$`, 'i') },
+    });
+    if (!category) {
+      category = await Category.create({ user_id: userId, name: trimmed, is_default: false });
+    }
+    return category;
+  }
+
   async handleListTransactions(args) {
-    const { username, category, type, startDate, endDate } = args;
-    
-    let query = { username };
-    
-    if (category) {
-      query.category = category;
-    }
-    
-    if (type) {
-      query.type = type;
-    }
-    
+    const { userId, category, type, startDate, endDate } = args;
+
+    const matchQuery = { user_id: new mongoose.Types.ObjectId(userId) };
+
+    if (type) matchQuery.type = type;
+
     if (startDate || endDate) {
-      query.date = {};
-      if (startDate) {
-        query.date.$gte = new Date(startDate);
-      }
-      if (endDate) {
-        query.date.$lte = new Date(endDate);
-      }
+      matchQuery.date = {};
+      if (startDate) matchQuery.date.$gte = new Date(startDate);
+      if (endDate) matchQuery.date.$lte = new Date(endDate);
     }
 
-    const transactions = await Transaction.find(query).sort({ date: -1 });
+    const pipeline = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'category_id',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+      {
+        $addFields: {
+          category_name: { $arrayElemAt: ['$category.name', 0] },
+        },
+      },
+      { $project: { category: 0 } },
+    ];
+
+    if (category) {
+      pipeline.push({ $match: { category_name: { $regex: new RegExp(category, 'i') } } });
+    }
+
+    pipeline.push({ $sort: { date: -1 } });
+
+    const transactions = await Transaction.aggregate(pipeline);
 
     return {
       content: [
@@ -242,7 +227,7 @@ class ExpenseMCPServer {
           text: JSON.stringify({
             success: true,
             count: transactions.length,
-            transactions: transactions,
+            transactions,
           }, null, 2),
         },
       ],
@@ -250,12 +235,7 @@ class ExpenseMCPServer {
   }
 
   async handleCreateTransaction(args) {
-    const { username, amount, category, type, date } = args;
-
-    // Validation
-    if (!username || typeof username !== 'string' || username.trim() === '') {
-      throw new Error('Valid username is required');
-    }
+    const { userId, amount, category, type, date, description } = args;
 
     if (!amount || amount <= 0) {
       throw new Error('Amount must be a positive number');
@@ -265,18 +245,19 @@ class ExpenseMCPServer {
       throw new Error('Category is required');
     }
 
-    if (!['budget', 'expense'].includes(type)) {
-      throw new Error('Type must be either "budget" or "expense"');
+    if (!['income', 'expense'].includes(type)) {
+      throw new Error('Type must be either "income" or "expense"');
     }
 
-    const sanitizedCategory = category.trim().replace(/[<>]/g, '');
+    const categoryDoc = await this.findOrCreateCategory(category, userId);
 
     const newTransaction = new Transaction({
-      username: username.trim(),
+      user_id: userId,
+      category_id: categoryDoc._id,
       amount: parseFloat(amount),
-      category: sanitizedCategory,
       type,
       date: new Date(date),
+      description: description || '',
     });
 
     const savedTransaction = await newTransaction.save();
@@ -288,88 +269,10 @@ class ExpenseMCPServer {
           text: JSON.stringify({
             success: true,
             message: 'Transaction created successfully',
-            transaction: savedTransaction,
-          }, null, 2),
-        },
-      ],
-    };
-  }
-
-  async handleUpdateTransaction(args) {
-    const { transactionId, amount, category, type } = args;
-
-    if (!transactionId) {
-      throw new Error('Transaction ID is required');
-    }
-
-    const updateFields = {};
-
-    if (amount !== undefined) {
-      if (amount <= 0) {
-        throw new Error('Amount must be a positive number');
-      }
-      updateFields.amount = parseFloat(amount);
-    }
-
-    if (category !== undefined) {
-      if (typeof category !== 'string' || category.trim() === '') {
-        throw new Error('Category cannot be empty');
-      }
-      updateFields.category = category.trim().replace(/[<>]/g, '');
-    }
-
-    if (type !== undefined) {
-      if (!['budget', 'expense'].includes(type)) {
-        throw new Error('Type must be either "budget" or "expense"');
-      }
-      updateFields.type = type;
-    }
-
-    const updatedTransaction = await Transaction.findByIdAndUpdate(
-      transactionId,
-      updateFields,
-      { new: true }
-    );
-
-    if (!updatedTransaction) {
-      throw new Error('Transaction not found');
-    }
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            success: true,
-            message: 'Transaction updated successfully',
-            transaction: updatedTransaction,
-          }, null, 2),
-        },
-      ],
-    };
-  }
-
-  async handleDeleteTransaction(args) {
-    const { transactionId } = args;
-
-    if (!transactionId) {
-      throw new Error('Transaction ID is required');
-    }
-
-    const deletedTransaction = await Transaction.findByIdAndDelete(transactionId);
-
-    if (!deletedTransaction) {
-      throw new Error('Transaction not found');
-    }
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            success: true,
-            message: 'Transaction deleted successfully',
-            transaction: deletedTransaction,
+            transaction: {
+              ...savedTransaction.toObject(),
+              category_name: categoryDoc.name,
+            },
           }, null, 2),
         },
       ],
@@ -377,53 +280,66 @@ class ExpenseMCPServer {
   }
 
   async handleGetSummary(args) {
-    const { username, categories, type, startDate, endDate } = args;
+    const { userId, categories, type, startDate, endDate } = args;
 
-    let query = { username };
+    const matchQuery = { user_id: new mongoose.Types.ObjectId(userId) };
 
-    if (categories && categories.length > 0) {
-      query.category = { $in: categories };
-    }
-
-    if (type) {
-      query.type = type;
-    }
+    if (type) matchQuery.type = type;
 
     if (startDate || endDate) {
-      query.date = {};
-      if (startDate) {
-        query.date.$gte = new Date(startDate);
-      }
-      if (endDate) {
-        query.date.$lte = new Date(endDate);
-      }
+      matchQuery.date = {};
+      if (startDate) matchQuery.date.$gte = new Date(startDate);
+      if (endDate) matchQuery.date.$lte = new Date(endDate);
     }
 
-    const transactions = await Transaction.find(query);
+    const pipeline = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'category_id',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+      {
+        $addFields: {
+          category_name: { $arrayElemAt: ['$category.name', 0] },
+        },
+      },
+      { $project: { category: 0 } },
+    ];
 
-    // Calculate totals
+    if (categories && categories.length > 0) {
+      pipeline.push({
+        $match: {
+          category_name: { $in: categories.map(c => new RegExp(c, 'i')) },
+        },
+      });
+    }
+
+    const transactions = await Transaction.aggregate(pipeline);
+
     const summary = {
       totalTransactions: transactions.length,
       totalAmount: 0,
       byCategory: {},
-      byType: { budget: 0, expense: 0 },
+      byType: { income: 0, expense: 0 },
     };
 
     transactions.forEach((transaction) => {
       summary.totalAmount += transaction.amount;
 
-      // By category
-      if (!summary.byCategory[transaction.category]) {
-        summary.byCategory[transaction.category] = {
-          count: 0,
-          total: 0,
-        };
+      const catName = transaction.category_name || 'Uncategorized';
+      if (!summary.byCategory[catName]) {
+        summary.byCategory[catName] = { count: 0, total: 0 };
       }
-      summary.byCategory[transaction.category].count += 1;
-      summary.byCategory[transaction.category].total += transaction.amount;
+      summary.byCategory[catName].count += 1;
+      summary.byCategory[catName].total += transaction.amount;
 
-      // By type
-      summary.byType[transaction.type] += transaction.amount;
+      if (summary.byType[transaction.type] !== undefined) {
+        summary.byType[transaction.type] += transaction.amount;
+      }
     });
 
     return {
@@ -432,8 +348,8 @@ class ExpenseMCPServer {
           type: 'text',
           text: JSON.stringify({
             success: true,
-            summary: summary,
-            transactions: transactions,
+            summary,
+            transactions,
           }, null, 2),
         },
       ],
@@ -447,6 +363,4 @@ class ExpenseMCPServer {
   }
 }
 
-// Export for use in chat controller
 module.exports = { ExpenseMCPServer };
-
