@@ -9,7 +9,6 @@ export default function TransactionList({ transactions }) {
 
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
   const fmtAmt  = (n) => `${user.preferred_currency} ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
-  console.log(transactions)
 
   return (
     <ul className="transaction-list">

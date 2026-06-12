@@ -1,5 +1,6 @@
 const router = require("express").Router()
 const Transaction = require("../models/transactionModel")
+const Categories = require("../models/categoryModel")
 const { requiredSignIn } = require("../middlewares/authMiddleware")
 const validate = require("../middlewares/validate")
 const { createTransaction, updateTransaction } = require("../validators/transactionValidators")
@@ -41,7 +42,26 @@ router.route("/")
     })
 
     newTransaction.save()
-      .then(() => res.json({ success: true, message: "Transaction added!", transaction: newTransaction }))
+      .then(async () => {
+        const [transaction] = await Transaction.aggregate([
+          { $match: { _id: newTransaction._id } },
+          {
+            $lookup: {
+              from: 'categories',
+              localField: 'category_id',
+              foreignField: '_id',
+              as: 'category'
+            }
+          },
+          {
+            $addFields: {
+              category_name: { $arrayElemAt: ['$category.name', 0] }
+            }
+          },
+          { $project: { category: 0 } }
+        ])
+        res.json({ success: true, message: "Transaction added!", transaction })
+      })
       .catch(() => res.status(400).json({ success: false, message: "Error adding transaction" }))
   })
 
