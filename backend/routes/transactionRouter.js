@@ -1,5 +1,6 @@
 const router = require("express").Router()
 const Transaction = require("../models/transactionModel")
+const Categories = require("../models/categoryModel")
 const { requiredSignIn } = require("../middlewares/authMiddleware")
 const validate = require("../middlewares/validate")
 const { createTransaction, updateTransaction } = require("../validators/transactionValidators")
