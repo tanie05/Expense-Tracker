@@ -16,6 +16,6 @@ const chatLimiter = rateLimit({
 
 router.post("/message", requiredSignIn, requireFeatureFlag("ai_chatbot"), chatLimiter, ...sendMessage, validate, handleChatMessage)
 
-router.get("/context/:username", requiredSignIn, requireFeatureFlag("ai_chatbot"), getUserContext)
+router.get("/context", requiredSignIn, requireFeatureFlag("ai_chatbot"), getUserContext)
 
 module.exports = router
