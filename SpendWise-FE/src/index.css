@@ -191,6 +191,24 @@ h1, h2, h3 { margin: 0; font-weight: 600; color: var(--text); }
 .stat-card.expense .stat-value { color: var(--golden-gate); }
 .stat-card.balance .stat-value { color: var(--toasted); }
 
+/* ── Charts ─────────────────────────────────────────── */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 20px 24px 8px;
+}
+
+.chart-card .section-title { margin-bottom: 8px; }
+
 /* ── Section headers ────────────────────────────────── */
 .section-title {
   font-size: 14px;

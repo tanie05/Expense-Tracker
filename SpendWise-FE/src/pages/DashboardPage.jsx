@@ -10,6 +10,9 @@ import {
   setDateRange
 } from '../store/slices/dashboardSlice'
 import { selectCurrentUser } from '../store/slices/authSlice'
+import { PieChart } from '@mui/x-charts/PieChart';
+import { BarChart } from '@mui/x-charts/BarChart';
+
 
 const monthOptions = (() => {
   const opts = []
@@ -73,6 +76,35 @@ export default function DashboardPage() {
     }
     return s
   }
+  // Fixed 8-hue categorical palette (CVD-validated). Category -> hue is
+  // assigned by a stable hash so a given category always keeps the same
+  // color, regardless of sort order or which categories are present.
+  const CATEGORY_PALETTE = ['#2a78d6', '#1baf7a', '#eda100', '#008300', '#4a3aa7', '#e34948', '#e87ba4', '#eb6834']
+
+  const colorForCategory = (name) => {
+    let hash = 0
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
+    return CATEGORY_PALETTE[Math.abs(hash) % CATEGORY_PALETTE.length]
+  }
+
+  const categoryTotal = categoryBreakdown.reduce((sum, item) => sum + Number(item.total || 0), 0)
+
+  const pieData = categoryBreakdown.map((item) => ({
+    id: item.category,
+    label: item.category,
+    value: Number(item.total || 0),
+    color: colorForCategory(item.category),
+  }))
+
+  const chartAxisSx = {
+    fontFamily: 'inherit',
+    '& .MuiChartsAxis-tickLabel': { fill: 'var(--text-muted)', fontSize: 12 },
+    '& .MuiChartsAxis-line': { stroke: 'var(--border)' },
+    '& .MuiChartsAxis-tick': { stroke: 'var(--border)' },
+    '& .MuiChartsGrid-line': { stroke: 'var(--border)' },
+    '& .MuiChartsLegend-series text': { fill: 'var(--text) !important', fontSize: '13px !important' },
+    '& .MuiChartsTooltip-table': { fontFamily: 'inherit' },
+  }
 
   return (
     <div className="page">
@@ -86,6 +118,61 @@ export default function DashboardPage() {
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
+      </div>
+
+      <div className="chart-grid">
+        <div className="chart-card">
+          <p className="section-title">Spending by Category</p>
+          {pieData.length > 0 ? (
+            <PieChart
+              series={[
+                {
+                  data: pieData,
+                  innerRadius: 55,
+                  outerRadius: 100,
+                  paddingAngle: 2,
+                  cornerRadius: 3,
+                  highlightScope: { fade: 'global', highlight: 'item' },
+                  faded: { innerRadius: 55, additionalRadius: -6, color: 'var(--border)' },
+                  valueFormatter: (item) => fmt(item.value),
+                  arcLabel: (item) => (item.value / categoryTotal >= 0.08 ? `${Math.round((item.value / categoryTotal) * 100)}%` : ''),
+                },
+              ]}
+              height={280}
+              slotProps={{ legend: { direction: 'vertical', position: { vertical: 'middle', horizontal: 'right' } } }}
+              sx={{
+                ...chartAxisSx,
+                '& .MuiPieArcLabel-root': { fill: '#fff', fontSize: 12, fontWeight: 600 },
+              }}
+            />
+          ) : (
+            <p className="empty-text">No category data for this period.</p>
+          )}
+        </div>
+
+        <div className="chart-card">
+          <p className="section-title">Income vs Expense</p>
+          {summary ? (
+            <BarChart
+              dataset={[{ label: 'This period', income: summary.income, expense: summary.expense }]}
+              xAxis={[{ dataKey: 'label', scaleType: 'band' }]}
+              series={[
+                { dataKey: 'income', label: 'Income', color: '#CB9650', valueFormatter: (v) => fmt(v) },
+                { dataKey: 'expense', label: 'Expense', color: '#9B3C27', valueFormatter: (v) => fmt(v) },
+              ]}
+              colors={['#CB9650', '#9B3C27']}
+              height={280}
+              barLabel="value"
+              slotProps={{ legend: { direction: 'row', position: { vertical: 'top', horizontal: 'middle' } } }}
+              sx={{
+                ...chartAxisSx,
+                '& .MuiBarLabel-root': { fill: 'var(--toasted)', fontSize: 12, fontWeight: 600 },
+              }}
+            />
+          ) : (
+            <p className="empty-text">No summary data for this period.</p>
+          )}
+        </div>
       </div>
 
       {status === 'loading' && <p className="loading-text">Loading…</p>}
@@ -111,6 +198,8 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      
 
       {categoryBreakdown?.length > 0 && (
         <div className="card" style={{ marginBottom: 24 }}>
