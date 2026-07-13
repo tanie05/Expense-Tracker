@@ -34,9 +34,10 @@ const transactionSchema = new Schema({
     type: Date,
     required: true
   },
-  is_recurring: {
-    type: Boolean,
-    default: false
+  recurring_rule_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'RecurringRule',
+    required: false
   }
 }, {
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
