@@ -1,5 +1,6 @@
 const JWT = require("jsonwebtoken")
 const userModel = require("../models/userModel")
+const { runCatchUp } = require("../services/recurringRuleService")
 
 
 const requiredSignIn = async(req,res,next) => {
@@ -28,8 +29,15 @@ const requiredSignIn = async(req,res,next) => {
         }
         
         req.user = user;
+
+        try {
+            await runCatchUp(user._id);
+        } catch (catchUpErr) {
+            console.log(catchUpErr);
+        }
+
         next()
-    
+
     }
     catch(err){
         console.log(err);

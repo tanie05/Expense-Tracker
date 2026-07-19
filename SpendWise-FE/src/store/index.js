@@ -5,6 +5,7 @@ import categoryReducer from './slices/categorySlice'
 import dashboardReducer from './slices/dashboardSlice'
 import chatReducer from './slices/chatSlice'
 import uiReducer from './slices/uiSlice'
+import recurringRuleReducer from './slices/recurringRuleSlice'
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +15,7 @@ export const store = configureStore({
     dashboard: dashboardReducer,
     chat: chatReducer,
     ui: uiReducer,
+    recurringRules: recurringRuleReducer,
   },
 })
+

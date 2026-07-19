@@ -11,7 +11,7 @@ export const fetchDashboard = createAsyncThunk(
         api.get('/dashboard/category-breakdown', { params }),
         api.get('/dashboard/cashflow', { params }),
       ])
-      console.log(summary.data, categoryBreakdown.data, cashflow.data)
+      // console.log(summary.data, categoryBreakdown.data, cashflow.data)
       return {
         summary: summary.data,
         categoryBreakdown: categoryBreakdown.data,

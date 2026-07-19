@@ -9,7 +9,7 @@ def service_auth_required(fn):
 
     def wrapper(*args, **kwargs):
         service_token = request.headers.get('X-Service-Token')
-        print(service_token)
+        # print(service_token)
         if not service_token:
             return jsonify({'error': 'Service token is required'}), 401
 
