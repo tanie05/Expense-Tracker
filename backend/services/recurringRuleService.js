@@ -47,26 +47,35 @@ const runCatchUp = async (userId) => {
     const rules = await RecurringRule.find(filter);
 
     for(const rule of rules){
-        let changed = false;
+        let currentRule = rule;
 
-        while(rule.next_run_date <= today && (!rule.end_date || rule.next_run_date <= rule.end_date)){
+        while(currentRule.next_run_date <= today && (!currentRule.end_date || currentRule.next_run_date <= currentRule.end_date)){
+            const dueDate = currentRule.next_run_date;
+            const nextDate = advanceDate(dueDate, currentRule.frequency, currentRule.interval, currentRule.day_of_month);
+
+            // Atomically claim this period: if another concurrent runCatchUp
+            // already advanced next_run_date, this match fails and we stop,
+            // preventing the same period from generating two transactions.
+            const claimedRule = await RecurringRule.findOneAndUpdate(
+                { _id: currentRule._id, next_run_date: dueDate },
+                { $set: { next_run_date: nextDate, last_generated_date: dueDate } },
+                { new: true }
+            );
+
+            if(!claimedRule) break;
+
             await Transaction.create({
-                user_id: rule.user_id,
-                category_id: rule.category_id,
-                type: rule.type,
-                amount: rule.amount,
-                currency: rule.currency,
-                description: rule.description,
-                date: rule.next_run_date,
-                recurring_rule_id: rule._id
+                user_id: claimedRule.user_id,
+                category_id: claimedRule.category_id,
+                type: claimedRule.type,
+                amount: claimedRule.amount,
+                currency: claimedRule.currency,
+                description: claimedRule.description,
+                date: dueDate,
+                recurring_rule_id: claimedRule._id
             });
 
-            rule.last_generated_date = rule.next_run_date;
-            rule.next_run_date = advanceDate(rule.next_run_date, rule.frequency, rule.interval, rule.day_of_month);
-            changed = true;
-        }
-        if(changed){
-            await rule.save();
+            currentRule = claimedRule;
         }
     }
 

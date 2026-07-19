@@ -10,6 +10,11 @@ import {
   setDateRange
 } from '../store/slices/dashboardSlice'
 import { selectCurrentUser } from '../store/slices/authSlice'
+import {
+  fetchUpcomingRecurringRules,
+  selectUpcomingRecurringRules
+} from '../store/slices/recurringRuleSlice'
+import { fetchCategories, selectCategories } from '../store/slices/categorySlice'
 import { PieChart } from '@mui/x-charts/PieChart';
 import { BarChart } from '@mui/x-charts/BarChart';
 
@@ -42,10 +47,17 @@ export default function DashboardPage() {
   const dateRange = useSelector(selectDashboardDateRange)
   const status = useSelector(selectDashboardStatus)
   const user = useSelector(selectCurrentUser)
+  const upcoming = useSelector(selectUpcomingRecurringRules)
+  const categories = useSelector(selectCategories)
 
   useEffect(() => {
     dispatch(fetchDashboard(dateRange))
   }, [dispatch, dateRange])
+
+  useEffect(() => {
+    dispatch(fetchUpcomingRecurringRules(30))
+    dispatch(fetchCategories())
+  }, [dispatch])
 
   const selectedValue = `${dateRange.startDate}|${dateRange.endDate}`
 
@@ -66,7 +78,9 @@ export default function DashboardPage() {
     n != null ? `${user.preferred_currency} ${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—'
 
   const HIDDEN_COLS = new Set(['category_id', 'categoryId', 'categoryid', 'created_at', 'createdAt', 'updated_at', 'updatedAt', '__v', '_id', 'user_id', 'description'])
-  const visibleKeys = (row) => Object.keys(row).filter((k) => !HIDDEN_COLS.has(k))
+  const VISIBLE_COLS = new Set(['type', 'amount', 'date', 'is_recurring'])
+  const visibleKeys = (row) => Object.keys(row).filter((k) => VISIBLE_COLS.has(k))
+
 
   const fmtCell = (v) => {
     if (v == null) return '—'
@@ -96,6 +110,11 @@ export default function DashboardPage() {
     color: colorForCategory(item.category),
   }))
 
+  const categoryName = (id) => categories.find((c) => c._id === id)?.name || '—'
+
+  const fmtUpcomingDate = (d) =>
+    new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
   const chartAxisSx = {
     fontFamily: 'inherit',
     '& .MuiChartsAxis-tickLabel': { fill: 'var(--text-muted)', fontSize: 12 },
@@ -105,6 +124,10 @@ export default function DashboardPage() {
     '& .MuiChartsLegend-series text': { fill: 'var(--text) !important', fontSize: '13px !important' },
     '& .MuiChartsTooltip-table': { fontFamily: 'inherit' },
   }
+  const updatedCashflow = cashflow.map((item) => ({
+    ...item,
+    is_recurring: Boolean(item.recurring_rule_id),
+  }))
 
   return (
     <div className="page">
@@ -118,6 +141,24 @@ export default function DashboardPage() {
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
+      </div>
+
+      <div className="card" style={{ marginBottom: 24 }}>
+        <p className="section-title">Upcoming this month</p>
+        {upcoming.length === 0 ? (
+          <p className="empty-text">No recurring transactions due in the next 30 days.</p>
+        ) : (
+          <ul className="category-list">
+            {upcoming.map((rule) => (
+              <li key={rule._id} className="category-item">
+                <span className="category-name">
+                  {rule.description || categoryName(rule.category_id)} — {fmt(rule.amount)}
+                </span>
+                <span className="range-label">{fmtUpcomingDate(rule.next_run_date)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="chart-grid">
@@ -221,17 +262,17 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {cashflow?.length > 0 && (
+      {updatedCashflow?.length > 0 && (
         <div className="card">
           <p className="section-title">Cashflow</p>
           <table className="data-table">
             <thead>
               <tr>
-                {visibleKeys(cashflow[0]).map((k) => <th key={k}>{k}</th>)}
+                {visibleKeys(updatedCashflow[0]).map((k) => <th key={k}>{k}</th>)}
               </tr>
             </thead>
             <tbody>
-              {cashflow.map((row, i) => (
+              {updatedCashflow.map((row, i) => (
                 <tr key={i}>
                   {visibleKeys(row).map((k) => <td key={k}>{fmtCell(row[k])}</td>)}
                 </tr>

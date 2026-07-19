@@ -9,12 +9,14 @@ import { fetchCategories } from '../store/slices/categorySlice'
 import TransactionList from '../components/TransactionList'
 import CreateTransaction from '../components/CreateTransaction'
 import CategoriesDrawer from '../components/CategoriesDrawer'
+import RecurringRulesDrawer from '../components/RecurringRulesDrawer'
 
 export default function TransactionsPage() {
   const dispatch = useDispatch()
   const transactions = useSelector(selectFilteredTransactions)
   const status = useSelector(selectTransactionStatus)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [recurringDrawerOpen, setRecurringDrawerOpen] = useState(false)
 
   useEffect(() => {
     dispatch(fetchTransactions())
@@ -30,6 +32,9 @@ export default function TransactionsPage() {
         <button className="btn btn-secondary" onClick={() => setDrawerOpen(true)}>
           Manage Categories
         </button>
+        <button className="btn btn-secondary" onClick={() => setRecurringDrawerOpen(true)}>
+          Manage Recurring Rules
+        </button>
       </div>
 
       <div className="card" style={{ marginBottom: 24 }}>
@@ -43,6 +48,7 @@ export default function TransactionsPage() {
       </div>
 
       <CategoriesDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <RecurringRulesDrawer open={recurringDrawerOpen} onClose={() => setRecurringDrawerOpen(false)} />
     </div>
   )
 }

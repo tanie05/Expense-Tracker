@@ -8,6 +8,8 @@ const chatRouter = require('./routes/chatRouter')
 const categoryRouter = require('./routes/categoryRouter')
 const userRouter = require('./routes/userRouter')
 const dashboardRouter = require('./routes/dashboard')
+const recurringRuleRouter = require('./routes/recurringRuleRouter')
+const { startRecurringCron } = require('./jobs/recurringCron')
 require('dotenv').config()
 
 // Validate required environment variables
@@ -45,13 +47,18 @@ app.use('/chat', chatRouter)
 app.use('/categories', categoryRouter)
 app.use('/', userRouter)
 app.use('/dashboard', dashboardRouter)
+app.use('/recurring-rule', recurringRuleRouter)
 // Connect to database and start server
 const startServer = async () => {
     try {
         const uri = process.env.MONGO_URL;
         await mongoose.connect(uri, {useNewUrlParser: true});
         console.log('MongoDB Connected Successfully');
-        
+
+        if (process.env.ENABLE_RECURRING_CRON === 'true') {
+            startRecurringCron();
+        }
+
         app.listen(PORT, () => {
             console.log(`Server is listening on port ${PORT}`);
         });

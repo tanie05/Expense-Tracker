@@ -7,7 +7,6 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import TransactionsPage from './pages/TransactionsPage'
-import CategoriesPage from './pages/CategoriesPage'
 
 export default function App() {
   return (
@@ -24,7 +23,6 @@ export default function App() {
                 <Routes>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/transactions" element={<TransactionsPage />} />
-                  <Route path="/categories" element={<CategoriesPage />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
                 <ChatWidget />
